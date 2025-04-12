@@ -16,6 +16,23 @@ const EventSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Please add an event date']
   },
+  location: {
+    type: String,
+    required: [true, 'Please add a location'],
+    trim: true,
+    maxlength: [200, 'Location cannot be more than 200 characters']
+  },
+  price: {
+    type: Number,
+    required: [true, 'Please add a price'],
+    min: [0, 'Price cannot be negative']
+  },
+  category: {
+    type: String,
+    required: [true, 'Please add a category'],
+    trim: true,
+    maxlength: [50, 'Category cannot be more than 50 characters']
+  },
   capacity: {
     type: Number,
     required: [true, 'Please add capacity'],
