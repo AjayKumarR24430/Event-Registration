@@ -229,7 +229,7 @@ TBD
 1. Clone the repository
    ```bash
    git clone https://github.com/AjayKumarR24430/Event-Registration.git
-   cd event-management-system/backend
+   cd Event-Registration/backend
    ```
 
 2. Install dependencies
@@ -253,11 +253,7 @@ TBD
 ### Backend Deployment
 
 1. Set up production environment variables
-2. Build the application
-   ```bash
-   npm run build
-   ```
 3. Start the server
    ```bash
-   npm start
+   npm run start
    ```
