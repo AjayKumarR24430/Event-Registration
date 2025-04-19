@@ -1,0 +1,33 @@
+// Auth Types
+export const REGISTER_SUCCESS = 'REGISTER_SUCCESS';
+export const REGISTER_FAIL = 'REGISTER_FAIL';
+export const USER_LOADED = 'USER_LOADED';
+export const AUTH_ERROR = 'AUTH_ERROR';
+export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const LOGIN_FAIL = 'LOGIN_FAIL';
+export const LOGOUT = 'LOGOUT';
+export const CLEAR_ERRORS = 'CLEAR_ERRORS';
+
+// Event Types
+export const GET_EVENTS = 'GET_EVENTS';
+export const GET_EVENT = 'GET_EVENT';
+export const ADD_EVENT = 'ADD_EVENT';
+export const UPDATE_EVENT = 'UPDATE_EVENT';
+export const DELETE_EVENT = 'DELETE_EVENT';
+export const EVENT_ERROR = 'EVENT_ERROR';
+export const CLEAR_EVENT = 'CLEAR_EVENT';
+export const FILTER_EVENTS = 'FILTER_EVENTS';
+export const CLEAR_FILTER = 'CLEAR_FILTER';
+export const SET_LOADING = 'SET_LOADING';
+
+// Registration Types
+export const GET_REGISTRATIONS = 'GET_REGISTRATIONS';
+export const ADD_REGISTRATION = 'ADD_REGISTRATION';
+export const CANCEL_REGISTRATION = 'CANCEL_REGISTRATION';
+export const UPDATE_REGISTRATION = 'UPDATE_REGISTRATION';
+export const REGISTRATION_ERROR = 'REGISTRATION_ERROR';
+export const CLEAR_REGISTRATION = 'CLEAR_REGISTRATION';
+export const GET_ADMIN_REGISTRATIONS = 'GET_ADMIN_REGISTRATIONS';
+
+// RTL Types
+export const TOGGLE_RTL = 'TOGGLE_RTL';
