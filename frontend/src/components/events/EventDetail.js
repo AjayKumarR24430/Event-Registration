@@ -75,7 +75,7 @@ const EventDetail = () => {
     return <Spinner />;
   }
   
-  const isAdmin = user && user.role === 'admin';
+  const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
   const hasAvailableSpots = event.availableSpots > 0;
   
   return (
