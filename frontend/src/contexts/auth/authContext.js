@@ -1,5 +1,9 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 
 const authContext = createContext();
 
-export default authContext;
+// Create a custom hook to use the auth context
+const useAuthContext = () => useContext(authContext);
+
+export default useAuthContext;
+export { authContext };

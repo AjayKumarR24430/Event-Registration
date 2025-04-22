@@ -22,8 +22,8 @@ import AuthState from './contexts/auth/AuthState';
 import EventState from './contexts/event/EventState';
 import RegistrationState from './contexts/registration/RegistrationState';
 import RtlState from './contexts/rtl/RtlState';
-import AuthContext from './contexts/auth/authContext';
-import RtlContext from './contexts/rtl/rtlContext';
+import useAuthContext from './contexts/auth/authContext';
+import useRtlContext from './contexts/rtl/rtlContext';
 
 import setAuthToken from './utils/setAuthToken';
 
@@ -33,10 +33,8 @@ if (localStorage.token) {
 }
 
 const AppContent = () => {
-  const authContext = useContext(AuthContext);
-  const rtlContext = useContext(RtlContext);
-  const { loadUser } = authContext;
-  const { isRtl } = rtlContext;
+  const { loadUser } = useAuthContext();
+  const { isRtl } = useRtlContext();
 
   useEffect(() => {
     loadUser();

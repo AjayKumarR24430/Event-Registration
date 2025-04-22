@@ -1,5 +1,9 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 
 const eventContext = createContext();
 
-export default eventContext;
+// Create a custom hook to use the event context
+const useEventContext = () => useContext(eventContext);
+
+export default useEventContext;
+export { eventContext };

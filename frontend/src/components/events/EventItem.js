@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { formatDate, isUpcoming } from '../../utils/dateFormatter';
-import RtlContext from '../../contexts/rtl/rtlContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const EventItem = ({ event }) => {
-  const rtlContext = useContext(RtlContext);
+  const rtlContext = useRtlContext();
   const { t } = rtlContext;
   
   const { _id, title, description, date, location, availableSpots, capacity } = event;

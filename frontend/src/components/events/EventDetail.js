@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { EventContext } from '../../contexts/event/eventContext';
-import { AuthContext } from '../../contexts/auth/authContext';
-import { RegistrationContext } from '../../contexts/registration/registrationContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useEventContext from '../../contexts/event/eventContext';
+import useAuthContext from '../../contexts/auth/authContext';
+import useRegistrationContext from '../../contexts/registration/registrationContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import Spinner from '../layout/Spinner';
 import Alert from '../layout/Alert';
 
@@ -11,10 +11,10 @@ const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const eventContext = useContext(EventContext);
-  const authContext = useContext(AuthContext);
-  const registrationContext = useContext(RegistrationContext);
-  const rtlContext = useContext(RtlContext);
+  const eventContext = useEventContext();
+  const authContext = useAuthContext();
+  const registrationContext = useRegistrationContext();
+  const rtlContext = useRtlContext();
   
   const { getEvent, event, loading } = eventContext;
   const { isAuthenticated, user } = authContext;

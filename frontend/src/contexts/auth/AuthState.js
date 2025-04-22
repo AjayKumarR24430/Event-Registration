@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 import axios from 'axios';
-import AuthContext from './authContext';
+import { authContext } from './authContext';
 import authReducer from './authReducer';
 import setAuthToken from '../../utils/setAuthToken';
 import api from '../../utils/api';
@@ -90,7 +90,7 @@ const AuthState = (props) => {
   const clearErrors = () => dispatch({ type: CLEAR_ERRORS });
 
   return (
-    <AuthContext.Provider
+    <authContext.Provider
       value={{
         token: state.token,
         isAuthenticated: state.isAuthenticated,
@@ -105,7 +105,7 @@ const AuthState = (props) => {
       }}
     >
       {props.children}
-    </AuthContext.Provider>
+    </authContext.Provider>
   );
 };
 

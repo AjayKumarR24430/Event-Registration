@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import EventContext from './eventContext';
+import { eventContext } from './eventContext';
 import eventReducer from './eventReducer';
 import api from '../../utils/api';
 
@@ -142,7 +142,7 @@ const EventState = (props) => {
   const setLoading = () => dispatch({ type: SET_LOADING });
 
   return (
-    <EventContext.Provider
+    <eventContext.Provider
       value={{
         events: state.events,
         currentEvent: state.currentEvent,
@@ -160,7 +160,7 @@ const EventState = (props) => {
       }}
     >
       {props.children}
-    </EventContext.Provider>
+    </eventContext.Provider>
   );
 };
 

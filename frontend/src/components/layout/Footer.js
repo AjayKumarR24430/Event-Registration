@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
-import RtlContext from '../../contexts/rtl/rtlContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const Footer = () => {
-  const rtlContext = useContext(RtlContext);
-  const { isRtl, toggleRtl, t } = rtlContext;
+  const { isRtl, toggleRtl, t } = useRtlContext();
   
   const currentYear = new Date().getFullYear();
   

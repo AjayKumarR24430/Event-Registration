@@ -1,16 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
-import EventContext from '../../contexts/event/eventContext';
-import RtlContext from '../../contexts/rtl/rtlContext';
+import React, { useEffect, useState } from 'react';
+import useEventContext from '../../contexts/event/eventContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import EventItem from './EventItem';
 import SearchEvents from './SearchEvents';
 import { sortEventsByDate } from '../../utils/dateFormatter';
 
 const EventList = () => {
-  const eventContext = useContext(EventContext);
-  const rtlContext = useContext(RtlContext);
-  
-  const { events, getEvents, loading, filtered } = eventContext;
-  const { t } = rtlContext;
+  const { events, getEvents, loading, filtered } = useEventContext();
+  const { t } = useRtlContext();
   
   const [sortedEvents, setSortedEvents] = useState([]);
   

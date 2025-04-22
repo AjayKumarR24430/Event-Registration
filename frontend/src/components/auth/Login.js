@@ -1,14 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from '../../contexts/auth/authContext';
-import RtlContext from '../../contexts/rtl/rtlContext';
+import useAuthContext from '../../contexts/auth/authContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const Login = () => {
-  const authContext = useContext(AuthContext);
-  const rtlContext = useContext(RtlContext);
-  
-  const { login, error, clearErrors, isAuthenticated } = authContext;
-  const { t } = rtlContext;
+  const { login, error, clearErrors, isAuthenticated } = useAuthContext();
+  const { t } = useRtlContext();
   
   const navigate = useNavigate();
 

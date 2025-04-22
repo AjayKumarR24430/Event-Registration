@@ -1,13 +1,13 @@
 import React, { useEffect, useContext } from 'react';
-import { RegistrationContext } from '../../contexts/registration/registrationContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useRegistrationContext from '../../contexts/registration/registrationContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import RegistrationItem from './RegistrationItem';
 import Spinner from '../layout/Spinner';
 import Alert from '../layout/Alert';
 
 const RegistrationList = ({ isAdmin = false }) => {
-  const registrationContext = useContext(RegistrationContext);
-  const rtlContext = useContext(RtlContext);
+  const registrationContext = useRegistrationContext();
+  const rtlContext = useRtlContext();
   
   const { 
     getMyRegistrations, 

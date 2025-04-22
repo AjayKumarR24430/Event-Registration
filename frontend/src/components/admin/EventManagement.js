@@ -1,14 +1,14 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { EventContext } from '../../contexts/event/eventContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useEventContext from '../../contexts/event/eventContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import SearchEvents from '../events/SearchEvents';
 import Spinner from '../layout/Spinner';
 import Alert from '../layout/Alert';
 
 const EventManagement = () => {
-  const eventContext = useContext(EventContext);
-  const rtlContext = useContext(RtlContext);
+  const eventContext = useEventContext();
+  const rtlContext = useRtlContext();
   
   const { events, getEvents, deleteEvent, loading, error, filtered } = eventContext;
   const { isRtl } = rtlContext;

@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import RtlContext from './rtlContext';
+import { rtlContext } from './rtlContext';
 import rtlReducer from './rtlReducer';
 import { TOGGLE_RTL } from '../types';
 
@@ -100,7 +100,7 @@ const RtlState = (props) => {
   };
 
   return (
-    <RtlContext.Provider
+    <rtlContext.Provider
       value={{
         isRtl: state.isRtl,
         toggleRtl,
@@ -108,7 +108,7 @@ const RtlState = (props) => {
       }}
     >
       {props.children}
-    </RtlContext.Provider>
+    </rtlContext.Provider>
   );
 };
 

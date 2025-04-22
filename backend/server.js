@@ -65,7 +65,7 @@ app.use('/api', apiLimiter);
 // More strict rate limit for auth routes
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 requests per hour
+  max: 100, // 10 requests per hour
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false

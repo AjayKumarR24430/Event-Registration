@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { RegistrationContext } from '../../contexts/registration/registrationContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useRegistrationContext from '../../contexts/registration/registrationContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const RegistrationItem = ({ registration, isAdmin }) => {
-  const registrationContext = useContext(RegistrationContext);
-  const rtlContext = useContext(RtlContext);
+  const registrationContext = useRegistrationContext();
+  const rtlContext = useRtlContext();
   
   const { approveRegistration, rejectRegistration, cancelRegistration } = registrationContext;
   const { isRtl } = rtlContext;

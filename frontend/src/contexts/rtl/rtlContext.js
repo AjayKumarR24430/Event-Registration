@@ -1,5 +1,9 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 
 const rtlContext = createContext();
 
-export default rtlContext;
+// Create a custom hook to use the rtl context
+const useRtlContext = () => useContext(rtlContext);
+
+export default useRtlContext;
+export { rtlContext };

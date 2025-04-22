@@ -1,14 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import AuthContext from '../../contexts/auth/authContext';
-import RtlContext from '../../contexts/rtl/rtlContext';
+import useAuthContext from '../../contexts/auth/authContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const Navbar = () => {
-  const authContext = useContext(AuthContext);
-  const rtlContext = useContext(RtlContext);
-  
-  const { isAuthenticated, logout, user } = authContext;
-  const { isRtl, toggleRtl, t } = rtlContext;
+  const { isAuthenticated, logout, user } = useAuthContext();
+  const { isRtl, toggleRtl, t } = useRtlContext();
   
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 

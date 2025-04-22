@@ -1,10 +1,9 @@
 import React from 'react';
-import { useContext } from 'react';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import RegistrationList from '../registrations/RegistrationList';
 
 const PendingRegistrations = () => {
-  const rtlContext = useContext(RtlContext);
+  const rtlContext = useRtlContext();
   const { isRtl } = rtlContext;
   
   return (

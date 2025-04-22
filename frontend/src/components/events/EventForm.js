@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { EventContext } from '../../contexts/event/eventContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useEventContext from '../../contexts/event/eventContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import Alert from '../layout/Alert';
 import Spinner from '../layout/Spinner';
 
 const EventForm = () => {
-  const eventContext = useContext(EventContext);
-  const rtlContext = useContext(RtlContext);
-  const { addEvent, updateEvent, getEvent, event, loading, error, clearErrors } = eventContext;
-  const { isRtl } = rtlContext;
+  const { addEvent, updateEvent, getEvent, event, loading, error, clearErrors } = useEventContext();
+  const { isRtl } = useRtlContext();
   
   const navigate = useNavigate();
   const { id } = useParams();

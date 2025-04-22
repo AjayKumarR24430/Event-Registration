@@ -1,12 +1,10 @@
-import React, { useState, useContext } from 'react';
-import { EventContext } from '../../contexts/event/eventContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import React, { useState } from 'react';
+import useEventContext from '../../contexts/event/eventContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const SearchEvents = () => {
-  const eventContext = useContext(EventContext);
-  const rtlContext = useContext(RtlContext);
-  const { searchEvents, clearSearch } = eventContext;
-  const { isRtl } = rtlContext;
+  const { searchEvents, clearSearch } = useEventContext();
+  const { isRtl } = useRtlContext();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
