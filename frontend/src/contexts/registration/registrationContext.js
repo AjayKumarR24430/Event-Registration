@@ -1,5 +1,9 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
 
 const registrationContext = createContext();
 
-export default registrationContext;
+// Create a custom hook to use the event context
+const useRegistrationContext = () => useContext(registrationContext);
+
+export default useRegistrationContext;
+export { registrationContext };

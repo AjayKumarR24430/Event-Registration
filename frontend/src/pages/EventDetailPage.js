@@ -10,14 +10,14 @@ import { formatDate } from '../utils/dateFormatter';
 const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getEventById, event, loading, updateEvent, deleteEvent } = useEventContext();
+  const { getEvent, event, loading, updateEvent, deleteEvent } = useEventContext();
   const { user } = useAuthContext();
   const { registerForEvent, getUserRegistrationForEvent, registration } = useRegistrationContext();
   const [isEditing, setIsEditing] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState(null);
 
   useEffect(() => {
-    getEventById(id);
+    getEvent(id);
     
     if (user) {
       getUserRegistrationForEvent(id);

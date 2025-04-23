@@ -32,10 +32,9 @@ const EventState = (props) => {
     setLoading();
     try {
       const res = await api.get('/events');
-
       dispatch({
         type: GET_EVENTS,
-        payload: res.data
+        payload: res.data.data
       });
     } catch (err) {
       dispatch({
@@ -156,7 +155,9 @@ const EventState = (props) => {
         deleteEvent,
         clearEvent,
         filterEvents,
-        clearFilter
+        clearFilter,
+        searchEvents: filterEvents,
+        clearSearch: clearFilter
       }}
     >
       {props.children}

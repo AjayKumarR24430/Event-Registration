@@ -33,13 +33,16 @@ if (localStorage.token) {
 }
 
 const AppContent = () => {
-  const { loadUser } = useAuthContext();
+  const { loadUser, user, loading } = useAuthContext();
   const { isRtl } = useRtlContext();
 
   useEffect(() => {
-    loadUser();
-    // eslint-disable-next-line
-  }, []);
+    // Only load user if we haven't already and there's a token
+    if (loading && localStorage.token) {
+      loadUser();
+    }
+  }, [loading, loadUser]);
+
 
   const appClass = isRtl ? 'rtl' : 'ltr';
 

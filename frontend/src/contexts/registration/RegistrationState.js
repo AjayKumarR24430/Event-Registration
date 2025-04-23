@@ -1,5 +1,5 @@
 import React, { useReducer } from 'react';
-import RegistrationContext from './registrationContext';
+import { registrationContext } from './registrationContext';
 import registrationReducer from './registrationReducer';
 import api from '../../utils/api';
 
@@ -151,7 +151,7 @@ const RegistrationState = (props) => {
   const setLoading = () => dispatch({ type: SET_LOADING });
 
   return (
-    <RegistrationContext.Provider
+    <registrationContext.Provider
       value={{
         registrations: state.registrations,
         adminRegistrations: state.adminRegistrations,
@@ -168,7 +168,7 @@ const RegistrationState = (props) => {
       }}
     >
       {props.children}
-    </RegistrationContext.Provider>
+    </registrationContext.Provider>
   );
 };
 

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import useEventContext from '../../contexts/event/eventContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 import EventItem from './EventItem';
-import SearchEvents from './SearchEvents';
 import { sortEventsByDate } from '../../utils/dateFormatter';
 
 const EventList = () => {
@@ -33,14 +32,10 @@ const EventList = () => {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <SearchEvents />
-      </div>
-      
+    <div>      
       {sortedEvents.length === 0 ? (
         <div className="text-center py-10">
-          <p className="text-lg text-gray-600">{t('noEventsFound')}</p>
+          <p className="text-lg text-gray-600">{t('No Events Found')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
