@@ -10,7 +10,7 @@ const RegistrationList = ({ isAdmin = false }) => {
   const rtlContext = useRtlContext();
   
   const { 
-    getMyRegistrations, 
+    getUserRegistrations, 
     getPendingRegistrations, 
     myRegistrations, 
     pendingRegistrations, 
@@ -24,7 +24,7 @@ const RegistrationList = ({ isAdmin = false }) => {
     if (isAdmin) {
       getPendingRegistrations();
     } else {
-      getMyRegistrations();
+      getUserRegistrations();
     }
     // eslint-disable-next-line
   }, [isAdmin]);

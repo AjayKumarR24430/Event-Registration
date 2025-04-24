@@ -18,7 +18,7 @@ const EventDetail = () => {
   
   const { getEvent, event, loading } = eventContext;
   const { isAuthenticated, user } = authContext;
-  const { registerForEvent, getMyRegistrations, myRegistrations, error, clearErrors } = registrationContext;
+  const { registerForEvent, getUserRegistrations, myRegistrations, error, clearRegistration } = registrationContext;
   const { isRtl } = rtlContext;
   
   const [alert, setAlert] = useState(null);
@@ -28,7 +28,7 @@ const EventDetail = () => {
     getEvent(id);
     
     if (isAuthenticated) {
-      getMyRegistrations();
+      getUserRegistrations();
     }
     
     // eslint-disable-next-line
@@ -37,7 +37,7 @@ const EventDetail = () => {
   useEffect(() => {
     if (error) {
       setAlert({ type: 'error', message: error });
-      clearErrors();
+      clearRegistration();
     }
     
     // Check if user is already registered for this event

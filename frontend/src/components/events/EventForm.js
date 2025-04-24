@@ -6,7 +6,7 @@ import Alert from '../layout/Alert';
 import Spinner from '../layout/Spinner';
 
 const EventForm = () => {
-  const { addEvent, updateEvent, getEvent, event, loading, error, clearErrors } = useEventContext();
+  const { addEvent, updateEvent, getEvent, event, loading, error, clearEvent } = useEventContext();
   const { isRtl } = useRtlContext();
   
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ const EventForm = () => {
     if (isEdit) {
       getEvent(id);
     } else {
-      clearErrors();
+      clearEvent();
     }
     // eslint-disable-next-line
   }, [id]);
@@ -36,7 +36,7 @@ const EventForm = () => {
   useEffect(() => {
     if (error) {
       setAlert({ type: 'error', message: error });
-      clearErrors();
+      clearEvent();
     }
     
     if (isEdit && event && !loading) {
@@ -68,7 +68,8 @@ const EventForm = () => {
     const eventData = {
       ...formData,
       price: parseFloat(formData.price),
-      capacity: parseInt(formData.capacity)
+      capacity: parseInt(formData.capacity),
+      availableSpots: parseInt(formData.capacity)
     };
     
     if (isEdit) {

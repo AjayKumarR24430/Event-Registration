@@ -1,10 +1,9 @@
 import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import AuthContext from '../../contexts/auth/authContext';
+import useAuthContext from '../../contexts/auth/authContext';
 
 const AdminRoute = ({ children }) => {
-  const authContext = useContext(AuthContext);
-  const { isAuthenticated, loading, user } = authContext;
+  const { isAuthenticated, loading, user } = useAuthContext;
 
   if (loading) {
     return (

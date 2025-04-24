@@ -33,7 +33,7 @@ const RegistrationState = (props) => {
 
       dispatch({
         type: GET_REGISTRATIONS,
-        payload: res.data
+        payload: res.data.data
       });
     } catch (err) {
       dispatch({
@@ -51,7 +51,7 @@ const RegistrationState = (props) => {
 
       dispatch({
         type: GET_ADMIN_REGISTRATIONS,
-        payload: res.data
+        payload: res.data.data
       });
     } catch (err) {
       dispatch({
@@ -69,10 +69,10 @@ const RegistrationState = (props) => {
 
       dispatch({
         type: ADD_REGISTRATION,
-        payload: res.data
+        payload: res.data.data
       });
       
-      return res.data;
+      return res.data.data;
     } catch (err) {
       dispatch({
         type: REGISTRATION_ERROR,
@@ -108,10 +108,10 @@ const RegistrationState = (props) => {
 
       dispatch({
         type: UPDATE_REGISTRATION,
-        payload: res.data
+        payload: res.data.data
       });
       
-      return res.data;
+      return res.data.data;
     } catch (err) {
       dispatch({
         type: REGISTRATION_ERROR,
@@ -129,7 +129,7 @@ const RegistrationState = (props) => {
 
       dispatch({
         type: UPDATE_REGISTRATION,
-        payload: res.data
+        payload: res.data.data
       });
       
       return res.data;
@@ -150,16 +150,33 @@ const RegistrationState = (props) => {
   // Set Loading
   const setLoading = () => dispatch({ type: SET_LOADING });
 
+  // Get User Registration For Event
+  const getUserRegistrationForEvent = async (eventId) => {
+    setLoading();
+    try {
+      const res = await api.get(`/events/${eventId}/registration`);
+      
+      return res.data.data;
+    } catch (err) {
+      dispatch({
+        type: REGISTRATION_ERROR,
+        payload: err.response?.data?.error || 'Failed to fetch registration'
+      });
+      return null;
+    }
+  };
+
   return (
     <registrationContext.Provider
       value={{
-        registrations: state.registrations,
+        myRegistrations: state.registrations,
         adminRegistrations: state.adminRegistrations,
         current: state.current,
         error: state.error,
         loading: state.loading,
         getUserRegistrations,
         getAdminRegistrations,
+        getUserRegistrationForEvent,
         registerForEvent,
         cancelRegistration,
         approveRegistration,

@@ -38,10 +38,10 @@ const AppContent = () => {
 
   useEffect(() => {
     // Only load user if we haven't already and there's a token
-    if (loading && localStorage.token) {
+    if (localStorage.token) {
       loadUser();
     }
-  }, [loading, loadUser]);
+  }, []);
 
 
   const appClass = isRtl ? 'rtl' : 'ltr';

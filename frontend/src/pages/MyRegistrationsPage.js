@@ -5,7 +5,7 @@ import useAuthContext from '../contexts/auth/authContext';
 import RegistrationList from '../components/registrations/RegistrationList';
 
 const MyRegistrationsPage = () => {
-  const { getUserRegistrations, userRegistrations, loading, cancelRegistration } = useRegistrationContext();
+  const { getUserRegistrations, myRegistrations, loading, cancelRegistration } = useRegistrationContext();
   const { user, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const MyRegistrationsPage = () => {
     }
   };
 
-  if (loading) {
+  if (loading && myRegistrations.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center">
@@ -38,33 +38,33 @@ const MyRegistrationsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">My Registrations</h1>
       
-      {userRegistrations.length > 0 ? (
+      {myRegistrations.length > 0 ? (
         <div>
           <div className="mb-6">
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="bg-yellow-100 border border-yellow-300 text-yellow-700 px-4 py-3 rounded-lg text-center">
                 <p className="font-semibold">Pending</p>
                 <p className="text-2xl font-bold">
-                  {userRegistrations.filter(reg => reg.status === 'pending').length}
+                  {myRegistrations.filter(reg => reg.status === 'pending').length}
                 </p>
               </div>
               <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-lg text-center">
                 <p className="font-semibold">Approved</p>
                 <p className="text-2xl font-bold">
-                  {userRegistrations.filter(reg => reg.status === 'approved').length}
+                  {myRegistrations.filter(reg => reg.status === 'approved').length}
                 </p>
               </div>
               <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-center">
                 <p className="font-semibold">Rejected</p>
                 <p className="text-2xl font-bold">
-                  {userRegistrations.filter(reg => reg.status === 'rejected').length}
+                  {myRegistrations.filter(reg => reg.status === 'rejected').length}
                 </p>
               </div>
             </div>
           </div>
           
           <RegistrationList 
-            registrations={userRegistrations} 
+            registrations={myRegistrations} 
             onCancelRegistration={handleCancelRegistration}
             isAdmin={false}
           />

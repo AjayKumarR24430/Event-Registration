@@ -17,13 +17,13 @@ import {
 } from '../types';
 
 const AuthState = (props) => {
-  const initialState = {
-    token: localStorage.getItem('token'),
-    isAuthenticated: null,
-    loading: true,
-    user: null,
-    error: null
-  };
+    const initialState = {
+      token: localStorage.getItem('token'),
+      isAuthenticated: localStorage.getItem('token') ? true : false, // Set initial value based on token
+      loading: localStorage.getItem('token') ? true : false, // Only set loading if we need to fetch user
+      user: null,
+      error: null
+    };
 
   const [state, dispatch] = useReducer(authReducer, initialState);
 
@@ -49,13 +49,16 @@ const AuthState = (props) => {
   const register = async (formData) => {
     try {
       const res = await api.post('/auth/signup', formData);
-
+      localStorage.setItem('token', res.data.token);
       dispatch({
         type: REGISTER_SUCCESS,
         payload: res.data
       });
 
-      loadUser();
+      dispatch({
+        type: USER_LOADED,
+        payload: res.data.user
+      });
     } catch (err) {
       dispatch({
         type: REGISTER_FAIL,
@@ -69,12 +72,16 @@ const AuthState = (props) => {
     try {
       const res = await api.post('/auth/login', formData);
 
+      localStorage.setItem('token', res.data.token);
       dispatch({
         type: LOGIN_SUCCESS,
         payload: res.data
       });
 
-      loadUser();
+      dispatch({
+        type: USER_LOADED,
+        payload: res.data.user
+      });
     } catch (err) {
       dispatch({
         type: LOGIN_FAIL,

@@ -10,9 +10,18 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Create a flag to track if component is mounted
+    let isMounted = true;
+    
+    // Only redirect if component is still mounted
+    if (isAuthenticated && isMounted) {
       navigate('/');
     }
+    
+    // Cleanup function to run when component unmounts
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line
   }, [isAuthenticated]);
 
