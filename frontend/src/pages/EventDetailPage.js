@@ -10,7 +10,7 @@ import { formatDate } from '../utils/dateFormatter';
 const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getEvent, event, loading, updateEvent, deleteEvent } = useEventContext();
+  const { getEvent, currentEvent, loading, updateEvent, deleteEvent } = useEventContext();
   const { user } = useAuthContext();
   const { registerForEvent, getUserRegistrationForEvent, registration } = useRegistrationContext();
   const [isEditing, setIsEditing] = useState(false);
@@ -67,7 +67,7 @@ const EventDetailPage = () => {
     );
   }
 
-  if (!event) {
+  if (!currentEvent) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -89,7 +89,7 @@ const EventDetailPage = () => {
         <div>
           <h2 className="text-2xl font-bold mb-6">Edit Event</h2>
           <EventForm 
-            event={event} 
+            event={currentEvent} 
             isEditing={true} 
             onComplete={handleEditComplete} 
           />
@@ -97,7 +97,7 @@ const EventDetailPage = () => {
       ) : (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">{event.title}</h1>
+            <h1 className="text-3xl font-bold">{currentEvent.title}</h1>
             {user && user.role === 'admin' && (
               <div className="space-x-4">
                 <button 
@@ -116,7 +116,7 @@ const EventDetailPage = () => {
             )}
           </div>
 
-          <EventDetail event={event} />
+          <EventDetail event={currentEvent} />
 
           <div className="mt-8">
             {registrationStatus ? (
@@ -144,7 +144,7 @@ const EventDetailPage = () => {
               </div>
             ) : (
               <div>
-                {event.availableSpots > 0 ? (
+                {currentEvent.availableSpots > 0 ? (
                   <button 
                     onClick={handleRegister}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200"

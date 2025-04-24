@@ -31,7 +31,7 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) clearErrors();
     if (e.target.name === 'confirmPassword' && password !== e.target.value) {
-      setPasswordError(t('passwordsDoNotMatch'));
+      setPasswordError(t('Passwords Do Not Match'));
     } else if (e.target.name === 'confirmPassword' && password === e.target.value) {
       setPasswordError('');
     }
@@ -41,7 +41,7 @@ const Register = () => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      setPasswordError(t('passwordsDoNotMatch'));
+      setPasswordError(t('Passwords Do Not Match'));
     } else {
       register({
         username,

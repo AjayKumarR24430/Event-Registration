@@ -16,9 +16,11 @@ A comprehensive event management platform with a Node.js/Express backend API and
   - [Logging](#logging)
 - [Frontend](#frontend)
   - [Tech Stack](#tech-stack-frontend)
-  - [Features](#frontend-features)
+  - [Components](#components)
+  - [State Management](#state-management)
+  - [Routing](#routing)
+  - [Frontend Features](#frontend-features)
 - [Setup and Installation](#setup-and-installation)
-- [Deployment](#deployment)
 
 ## Overview
 
@@ -33,13 +35,15 @@ The Event Management System is a full-stack application designed to facilitate e
 - Super admin capabilities for system management
 - Redis caching for improved performance
 - Comprehensive error handling and logging
+- Responsive UI with Tailwind CSS
+- RTL language support
 
 ## Architecture
 
 The application follows a client-server architecture:
 
 - **Backend**: RESTful API built with Node.js and Express
-- **Frontend**: [TBD] React-based SPA
+- **Frontend**: React-based SPA with Context API for state management
 - **Database**: MongoDB for data persistence
 - **Caching**: Redis for improved performance
 - **Authentication**: JWT-based authentication system
@@ -206,15 +210,140 @@ Logs include timestamps, request details, and contextual information to facilita
 
 ## Frontend
 
-[This section will be completed after the frontend implementation]
-
 ### Tech Stack (Frontend)
 
-TBD
+- **React**: JavaScript library for building user interfaces
+- **React Router**: For application routing
+- **Context API**: For state management
+- **Axios**: HTTP client for API requests
+- **Tailwind CSS**: Utility-first CSS framework for styling
+- **React Hook Form**: For form validation and handling
+
+### Components
+
+The frontend is organized into several key component categories:
+
+#### Layout Components
+- **Navbar**: Application navigation with dynamic links based on authentication status
+- **Footer**: Application footer with basic information
+- **PrivateRoute**: Route wrapper to protect authenticated routes
+- **AdminRoute**: Route wrapper to protect admin-only routes
+
+#### Auth Components
+- **Login**: User login form
+- **Register**: New user registration form
+- **Profile**: User profile information and settings
+
+#### Event Components
+- **EventCard**: Card display for individual events in listings
+- **EventList**: Grid layout of event cards with filtering options
+- **EventDetail**: Detailed view of a single event
+- **EventForm**: Form for creating and editing events (admin only)
+
+#### Registration Components
+- **RegistrationList**: List of user's event registrations
+- **AdminRegistrationManager**: Interface for admins to approve/reject registrations
+
+### State Management
+
+The application uses React Context API with useReducer for state management, organized into several contexts:
+
+- **AuthContext**: Manages user authentication state
+- **EventContext**: Handles event data and operations
+- **RegistrationContext**: Manages registration data and operations
+- **RtlContext**: Controls right-to-left layout functionality
+
+Example of Context implementation:
+
+```javascript
+// Auth Context
+const AuthState = (props) => {
+  const initialState = {
+    token: localStorage.getItem('token'),
+    isAuthenticated: null,
+    loading: true,
+    user: null,
+    error: null
+  };
+
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  // Load User
+  const loadUser = async () => {
+    if (localStorage.token) {
+      setAuthToken(localStorage.token);
+    }
+
+    try {
+      const res = await api.get('/auth/me');
+      dispatch({
+        type: USER_LOADED,
+        payload: res.data
+      });
+    } catch (err) {
+      dispatch({ type: AUTH_ERROR });
+    }
+  };
+
+  // Other auth functions...
+
+  return (
+    <authContext.Provider
+      value={{
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+        loading: state.loading,
+        user: state.user,
+        error: state.error,
+        register,
+        login,
+        logout,
+        loadUser,
+        clearErrors
+      }}
+    >
+      {props.children}
+    </authContext.Provider>
+  );
+};
+```
+
+### Routing
+
+The application uses React Router v6 for client-side routing with the following main routes:
+
+- `/`: Home page with featured events
+- `/events`: All events listing with filters
+- `/events/:id`: Detailed view of a specific event
+- `/login`: User login
+- `/register`: New user registration
+- `/my-registrations`: User's event registrations (authenticated users only)
+- `/admin/events`: Admin event management (admin only)
+- `/admin/registrations`: Admin registration management (admin only)
+
+Protected routes are implemented using wrapper components that redirect unauthorized users:
+
+```javascript
+// PrivateRoute example
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuthContext();
+  
+  return !loading && isAuthenticated ? children : <Navigate to="/login" />;
+};
+```
 
 ### Frontend Features
 
-TBD
+- **Responsive Design**: Mobile-first approach using Tailwind CSS
+- **Form Validation**: Client-side validation for all forms
+- **Real-time Feedback**: Visual feedback for user actions
+- **Filtering**: Event filtering by title, date, category
+- **Pagination**: For events and registration listings
+- **RTL Support**: Right-to-left layout for multilingual support
+- **Error Handling**: User-friendly error messages
+- **Loading States**: Visual indicators during data fetching
+- **Protected Routes**: Authentication-based route protection
+- **Role-based UI**: Different UI elements based on user role
 
 ## Setup and Installation
 
@@ -248,12 +377,25 @@ TBD
    npm run dev
    ```
 
-## Deployment
+### Frontend Setup
 
-### Backend Deployment
-
-1. Set up production environment variables
-3. Start the server
+1. Navigate to the frontend directory
    ```bash
-   npm run start
+   cd ../frontend
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API URL
+   ```
+
+4. Start the development server
+   ```bash
+   npm start
    ```

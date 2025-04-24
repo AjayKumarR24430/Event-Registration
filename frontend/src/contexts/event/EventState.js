@@ -52,7 +52,7 @@ const EventState = (props) => {
 
       dispatch({
         type: GET_EVENT,
-        payload: res.data
+        payload: res.data.data
       });
     } catch (err) {
       dispatch({
@@ -70,10 +70,10 @@ const EventState = (props) => {
 
       dispatch({
         type: ADD_EVENT,
-        payload: res.data
+        payload: res.data.data
       });
       
-      return res.data;
+      return res.data.data;
     } catch (err) {
       dispatch({
         type: EVENT_ERROR,
@@ -91,10 +91,10 @@ const EventState = (props) => {
 
       dispatch({
         type: UPDATE_EVENT,
-        payload: res.data
+        payload: res.data.data
       });
       
-      return res.data;
+      return res.data.data;
     } catch (err) {
       dispatch({
         type: EVENT_ERROR,

@@ -13,7 +13,7 @@ const EventItem = ({ event }) => {
   const isEventUpcoming = isUpcoming(date);
   
   let statusClass = 'bg-green-100 text-green-800';
-  let statusText = `${availableSpots} ${t('spotsLeft')}`;
+  let statusText = `${availableSpots} ${t('Spots Left')}`;
   
   if (isFull) {
     statusClass = 'bg-red-100 text-red-800';
