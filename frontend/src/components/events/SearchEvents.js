@@ -3,71 +3,128 @@ import useEventContext from '../../contexts/event/eventContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const SearchEvents = () => {
-  const { searchEvents, clearSearch } = useEventContext();
+  const { searchEvents, clearSearch, loading, error } = useEventContext();
   const { isRtl } = useRtlContext();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
+  const [searchCategory, setSearchCategory] = useState('');
+  const [searchPerformed, setSearchPerformed] = useState(false);
   
-  const handleSearch = e => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (searchTerm.trim() === '' && searchDate === '') {
-      clearSearch();
-      return;
-    }
+    setSearchPerformed(true);
     
-    searchEvents({ term: searchTerm, date: searchDate });
+    try {
+      // Only search if at least one field has a value
+      if (searchTerm.trim() === '' && searchDate === '' && searchCategory === '') {
+        await clearSearch();
+        return;
+      }
+      
+      await searchEvents({
+        term: searchTerm.trim(),
+        date: searchDate,
+        category: searchCategory
+      });
+    } catch (err) {
+      console.error('Search error:', err);
+    }
   };
   
-  const handleClear = () => {
+  const handleClear = async () => {
     setSearchTerm('');
     setSearchDate('');
-    clearSearch();
+    setSearchCategory('');
+    setSearchPerformed(false);
+    await clearSearch();
+  };
+
+  const handleKeyPress = async (e) => {
+    // Trigger search on Enter key in the title field
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      await handleSearch(e);
+    }
   };
   
   return (
     <div className={`bg-white rounded-lg shadow-md p-4 mb-6 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
-        <div className="flex-grow">
-          <label htmlFor="searchTerm" className="sr-only">
-            {isRtl ? 'بحث عن الأحداث' : 'Search Events'}
-          </label>
-          <input
-            type="text"
-            id="searchTerm"
-            placeholder={isRtl ? 'البحث حسب العنوان أو الوصف...' : 'Search by title or description...'}
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
+      <form onSubmit={handleSearch} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 mb-1">
+              {isRtl ? 'البحث عن الفعاليات' : 'Search Events'}
+            </label>
+            <input
+              type="text"
+              id="searchTerm"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={isRtl ? 'ابحث بالعنوان' : 'Search by title'}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="searchDate" className="block text-sm font-medium text-gray-700 mb-1">
+              {isRtl ? 'التاريخ' : 'Date'}
+            </label>
+            <input
+              type="date"
+              id="searchDate"
+              value={searchDate}
+              onChange={e => setSearchDate(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="searchCategory" className="block text-sm font-medium text-gray-700 mb-1">
+              {isRtl ? 'التصنيف' : 'Category'}
+            </label>
+            <select
+              id="searchCategory"
+              value={searchCategory}
+              onChange={e => setSearchCategory(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">{isRtl ? 'جميع التصنيفات' : 'All Categories'}</option>
+              <option value="conference">{isRtl ? 'مؤتمر' : 'Conference'}</option>
+              <option value="workshop">{isRtl ? 'ورشة عمل' : 'Workshop'}</option>
+              <option value="seminar">{isRtl ? 'ندوة' : 'Seminar'}</option>
+              <option value="networking">{isRtl ? 'تواصل' : 'Networking'}</option>
+              <option value="other">{isRtl ? 'أخرى' : 'Other'}</option>
+            </select>
+          </div>
         </div>
         
-        <div>
-          <label htmlFor="searchDate" className="sr-only">
-            {isRtl ? 'تاريخ الحدث' : 'Event Date'}
-          </label>
-          <input
-            type="date"
-            id="searchDate"
-            value={searchDate}
-            onChange={e => setSearchDate(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-        </div>
+        {error && searchPerformed && (
+          <div className="text-red-600 text-sm mt-2">
+            {error}
+          </div>
+        )}
         
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition duration-200"
-          >
-            {isRtl ? 'بحث' : 'Search'}
-          </button>
+        <div className="flex justify-end space-x-2">
           <button
             type="button"
             onClick={handleClear}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+            disabled={loading}
+            className={`px-4 py-2 text-gray-700 bg-gray-100 rounded-lg transition duration-200 ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200'
+            }`}
           >
             {isRtl ? 'مسح' : 'Clear'}
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`px-4 py-2 bg-primary-600 text-white rounded-lg transition duration-200 ${
+              loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'
+            }`}
+          >
+            {loading ? (isRtl ? 'جاري البحث...' : 'Searching...') : (isRtl ? 'بحث' : 'Search')}
           </button>
         </div>
       </form>

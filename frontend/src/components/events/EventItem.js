@@ -24,7 +24,7 @@ const EventItem = ({ event }) => {
   
   if (!isEventUpcoming) {
     statusClass = 'bg-gray-100 text-gray-800';
-    statusText = t('eventPassed');
+    statusText = t('Event Passed');
   }
 
   return (

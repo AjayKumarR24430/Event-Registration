@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useRegistrationContext from '../contexts/registration/registrationContext';
 import useAuthContext from '../contexts/auth/authContext';
 import PendingRegistrations from '../components/admin/PendingRegistrations';
+import Spinner from '../components/layout/Spinner';
 
 const AdminRegistrationsPage = () => {
   const { 
-    getPendingRegistrations, 
+    getAdminRegistrations, 
     adminRegistrations, 
     loading, 
     approveRegistration, 
@@ -16,6 +17,15 @@ const AdminRegistrationsPage = () => {
   const { user, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
   const [filter, setFilter] = useState('pending');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const fetchRegistrations = useCallback(async () => {
+    try {
+      await getAdminRegistrations();
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+    }
+  }, [getAdminRegistrations]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -27,28 +37,42 @@ const AdminRegistrationsPage = () => {
       navigate('/');
       return;
     }
-    
-    getPendingRegistrations();
-  }, [isAuthenticated, user, navigate]);
+
+    if (isInitialLoad) {
+      fetchRegistrations().then(() => {
+        setIsInitialLoad(false);
+      });
+    }
+  }, [isAuthenticated, user, navigate, isInitialLoad, fetchRegistrations]);
 
   const handleApprove = async (registrationId) => {
-    await approveRegistration(registrationId);
+    try {
+      await approveRegistration(registrationId);
+      await fetchRegistrations();
+    } catch (error) {
+      console.error('Error approving registration:', error);
+    }
   };
 
   const handleReject = async (registrationId, reason) => {
-    await rejectRegistration(registrationId, reason);
+    try {
+      await rejectRegistration(registrationId, reason);
+      await fetchRegistrations();
+    } catch (error) {
+      console.error('Error rejecting registration:', error);
+    }
   };
 
-  const filteredRegistrations = adminRegistrations.filter(reg => {
+  const filteredRegistrations = adminRegistrations?.filter(reg => {
     if (filter === 'all') return true;
     return reg.status === filter;
-  });
+  }) || [];
 
-  if (loading) {
+  if (isInitialLoad && loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center">
-          <div className="loader">Loading...</div>
+          <Spinner />
         </div>
       </div>
     );
@@ -59,13 +83,13 @@ const AdminRegistrationsPage = () => {
       <h1 className="text-3xl font-bold mb-8">Manage Registrations</h1>
       
       <div className="mb-8">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div 
             className={`cursor-pointer text-center p-4 rounded-lg ${filter === 'all' ? 'bg-blue-100 border-blue-300 border' : 'bg-gray-100'}`}
             onClick={() => setFilter('all')}
           >
             <p className="font-semibold">All</p>
-            <p className="text-2xl font-bold">{adminRegistrations.length}</p>
+            <p className="text-2xl font-bold">{adminRegistrations?.length || 0}</p>
           </div>
           <div 
             className={`cursor-pointer text-center p-4 rounded-lg ${filter === 'pending' ? 'bg-yellow-100 border-yellow-300 border' : 'bg-gray-100'}`}
@@ -73,7 +97,7 @@ const AdminRegistrationsPage = () => {
           >
             <p className="font-semibold">Pending</p>
             <p className="text-2xl font-bold">
-              {adminRegistrations.filter(reg => reg.status === 'pending').length}
+              {adminRegistrations?.filter(reg => reg.status === 'pending').length || 0}
             </p>
           </div>
           <div 
@@ -82,7 +106,7 @@ const AdminRegistrationsPage = () => {
           >
             <p className="font-semibold">Approved</p>
             <p className="text-2xl font-bold">
-              {adminRegistrations.filter(reg => reg.status === 'approved').length}
+              {adminRegistrations?.filter(reg => reg.status === 'approved').length || 0}
             </p>
           </div>
           <div 
@@ -91,13 +115,13 @@ const AdminRegistrationsPage = () => {
           >
             <p className="font-semibold">Rejected</p>
             <p className="text-2xl font-bold">
-              {adminRegistrations.filter(reg => reg.status === 'rejected').length}
+              {adminRegistrations?.filter(reg => reg.status === 'rejected').length || 0}
             </p>
           </div>
         </div>
       </div>
       
-      {adminRegistrations.length > 0 ? (
+      {filteredRegistrations.length > 0 ? (
         <PendingRegistrations 
           registrations={filteredRegistrations}
           onApprove={handleApprove}

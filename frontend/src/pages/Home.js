@@ -1,52 +1,92 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import useEventContext from '../contexts/event/eventContext';
+import useRtlContext from '../contexts/rtl/rtlContext';
+import Spinner from '../components/layout/Spinner';
 
 const Home = () => {
-  const { events, loading } = useEventContext();
+  const { events, getEvents, loading } = useEventContext();
+  const { isRtl } = useRtlContext();
 
   useEffect(() => {
+    getEvents();
+    // eslint-disable-next-line
   }, []);
+
+  const getFeaturedEvents = () => {
+    if (!events) return [];
+    const now = new Date();
+    return events
+      .filter(event => new Date(event.date) > now)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 3);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Event Registration System</h1>
-        <p className="text-xl mb-6">Find and register for upcoming events</p>
-        <Link to="/events" className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200">
-          Browse All Events
+        <h1 className="text-4xl font-bold mb-4">
+          {isRtl ? 'نظام تسجيل الفعاليات' : 'Event Registration System'}
+        </h1>
+        <p className="text-xl mb-6">
+          {isRtl ? 'ابحث وسجل في الفعاليات القادمة' : 'Find and register for upcoming events'}
+        </p>
+        <Link 
+          to="/events" 
+          className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200"
+        >
+          {isRtl ? 'تصفح جميع الفعاليات' : 'Browse All Events'}
         </Link>
       </div>
 
       <div className="my-12">
-        <h2 className="text-2xl font-semibold mb-6">Featured Events</h2>
+        <h2 className="text-2xl font-semibold mb-6">
+          {isRtl ? 'الفعاليات المميزة' : 'Featured Events'}
+        </h2>
         
         {loading ? (
-          <div className="flex justify-center">
-            <div className="loader">Loading...</div>
-          </div>
-        ) : events.length > 0 ? (
+          <Spinner />
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.slice(0, 3).map(event => (
-              <div key={event._id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+            {getFeaturedEvents().map(event => (
+              <div key={event._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="p-6">
                   <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
-                  <p className="text-gray-600 mb-4">{new Date(event.date).toLocaleDateString()}</p>
-                  <p className="mb-4">{event.description.substring(0, 100)}...</p>
-                  <div className="flex justify-between items-center">
-                    <span className={`px-3 py-1 rounded-full text-sm ${event.availableSpots > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {event.availableSpots > 0 ? `${event.availableSpots} spots left` : 'Sold out'}
-                    </span>
-                    <Link to={`/events/${event._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
-                      View Details
-                    </Link>
+                  <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
+                  
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-500">
+                      <span className="font-medium">
+                        {isRtl ? 'التاريخ:' : 'Date:'}{' '}
+                      </span>
+                      {new Date(event.date).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      <span className="font-medium">
+                        {isRtl ? 'الموقع:' : 'Location:'}{' '}
+                      </span>
+                      {event.location}
+                    </p>
                   </div>
+                  
+                  <Link 
+                    to={`/events/${event._id}`}
+                    className="inline-block bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 transition duration-200"
+                  >
+                    {isRtl ? 'عرض التفاصيل' : 'View Details'}
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-center text-gray-600">No featured events available</p>
+        )}
+        
+        {!loading && getFeaturedEvents().length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-600">
+              {isRtl ? 'لا توجد فعاليات قادمة حالياً' : 'No upcoming events at the moment'}
+            </p>
+          </div>
         )}
       </div>
 

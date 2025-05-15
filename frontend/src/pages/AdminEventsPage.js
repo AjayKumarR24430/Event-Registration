@@ -1,16 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useEventContext from '../contexts/event/eventContext';
 import useAuthContext from '../contexts/auth/authContext';
 import EventForm from '../components/events/EventForm';
 import EventManagement from '../components/admin/EventManagement';
+import Spinner from '../components/layout/Spinner';
 
 const AdminEventsPage = () => {
-  const { getAllEvents, events, loading, deleteEvent } = useEventContext();
+  const { getEvents, events, loading, deleteEvent } = useEventContext();
   const { user, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      await getEvents();
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    }
+  }, [getEvents]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -23,8 +33,12 @@ const AdminEventsPage = () => {
       return;
     }
     
-    getAllEvents();
-  }, [isAuthenticated, user, navigate]);
+    if (isInitialLoad) {
+      fetchEvents().then(() => {
+        setIsInitialLoad(false);
+      });
+    }
+  }, [isAuthenticated, user, navigate, isInitialLoad, fetchEvents]);
 
   const handleAddEvent = () => {
     setEditingEvent(null);
@@ -38,20 +52,26 @@ const AdminEventsPage = () => {
 
   const handleDeleteEvent = async (eventId) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
-      await deleteEvent(eventId);
+      try {
+        await deleteEvent(eventId);
+        await fetchEvents(); // Refresh the list after deletion
+      } catch (error) {
+        console.error('Error deleting event:', error);
+      }
     }
   };
 
-  const handleFormComplete = () => {
+  const handleFormComplete = async () => {
     setShowAddForm(false);
     setEditingEvent(null);
+    await fetchEvents(); // Refresh the list after adding/editing
   };
 
-  if (loading) {
+  if (isInitialLoad && loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center">
-          <div className="loader">Loading...</div>
+          <Spinner />
         </div>
       </div>
     );
@@ -82,7 +102,7 @@ const AdminEventsPage = () => {
         </div>
       )}
       
-      {events.length > 0 ? (
+      {events && events.length > 0 ? (
         <EventManagement 
           events={events} 
           onEdit={handleEditEvent} 

@@ -27,20 +27,77 @@ const EventState = (props) => {
 
   const [state, dispatch] = useReducer(eventReducer, initialState);
 
-  // Get Events
-  const getEvents = async () => {
+  // Get Events with search parameters
+  const getEvents = async (searchParams = {}) => {
     setLoading();
     try {
-      const res = await api.get('/events');
+      // Build query string from search parameters
+      const queryParams = new URLSearchParams();
+      
+      // Only add parameters that have values
+      Object.entries(searchParams).forEach(([key, value]) => {
+        if (value && value.trim() !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
+      const queryString = queryParams.toString();
+      const url = `/events${queryString ? `?${queryString}` : ''}`;
+      
+      console.log('Fetching events with URL:', url); // Debug log
+      
+      const res = await api.get(url);
+      
       dispatch({
         type: GET_EVENTS,
         payload: res.data.data
       });
+
+      return res.data.data;
     } catch (err) {
+      console.error('Error fetching events:', err); // Debug log
       dispatch({
         type: EVENT_ERROR,
         payload: err.response?.data?.error || 'Failed to fetch events'
       });
+      throw err;
+    }
+  };
+
+  // Search Events
+  const searchEvents = async (searchParams) => {
+    setLoading();
+    try {
+      // Clean up search parameters
+      const cleanParams = {};
+      
+      if (searchParams.term) {
+        cleanParams.title = searchParams.term;
+      }
+      
+      if (searchParams.date) {
+        cleanParams.date = searchParams.date;
+      }
+      
+      if (searchParams.category) {
+        cleanParams.category = searchParams.category;
+      }
+
+      // Only perform search if we have at least one search parameter
+      const hasSearchParams = Object.values(cleanParams).some(value => value && value.trim() !== '');
+      
+      if (!hasSearchParams) {
+        return await getEvents(); // If no search params, get all events
+      }
+
+      return await getEvents(cleanParams);
+    } catch (err) {
+      console.error('Error searching events:', err); // Debug log
+      dispatch({
+        type: EVENT_ERROR,
+        payload: err.response?.data?.error || 'Failed to search events'
+      });
+      throw err;
     }
   };
 
@@ -154,10 +211,8 @@ const EventState = (props) => {
         updateEvent,
         deleteEvent,
         clearEvent,
-        filterEvents,
-        clearFilter,
-        searchEvents: filterEvents,
-        clearSearch: clearFilter
+        searchEvents,
+        clearSearch: () => getEvents()
       }}
     >
       {props.children}

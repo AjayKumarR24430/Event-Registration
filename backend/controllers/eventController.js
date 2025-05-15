@@ -26,6 +26,11 @@ exports.getEvents = async (req, res, next) => {
     if (title) {
       query.title = { $regex: title, $options: 'i' };
     }
+
+    // Filter by category
+    if (category) {
+      query.category = category;
+    }
     
     // Filter by date
     if (date) {

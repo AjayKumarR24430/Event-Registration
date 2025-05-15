@@ -194,15 +194,21 @@ const EventForm = () => {
                 <label className="block text-gray-700 font-medium mb-2" htmlFor="category">
                   {isRtl ? 'التصنيف' : 'Category'}
                 </label>
-                <input
-                  type="text"
+                <select
                   id="category"
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+                >
+                  <option value="">{isRtl ? 'اختر التصنيف' : 'Select Category'}</option>
+                  <option value="conference">{isRtl ? 'مؤتمر' : 'Conference'}</option>
+                  <option value="workshop">{isRtl ? 'ورشة عمل' : 'Workshop'}</option>
+                  <option value="seminar">{isRtl ? 'ندوة' : 'Seminar'}</option>
+                  <option value="networking">{isRtl ? 'تواصل' : 'Networking'}</option>
+                  <option value="other">{isRtl ? 'أخرى' : 'Other'}</option>
+                </select>
               </div>
               
               <div className="mb-4">
@@ -215,8 +221,8 @@ const EventForm = () => {
                   name="capacity"
                   value={formData.capacity}
                   onChange={handleChange}
-                  min="1"
                   required
+                  min="1"
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>

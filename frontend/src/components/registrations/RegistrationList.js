@@ -11,9 +11,9 @@ const RegistrationList = ({ isAdmin = false }) => {
   
   const { 
     getUserRegistrations, 
-    getPendingRegistrations, 
+    getAdminRegistrations, 
     myRegistrations, 
-    pendingRegistrations, 
+    adminRegistrations, 
     loading, 
     error 
   } = registrationContext;
@@ -22,7 +22,7 @@ const RegistrationList = ({ isAdmin = false }) => {
   
   useEffect(() => {
     if (isAdmin) {
-      getPendingRegistrations();
+      getAdminRegistrations();
     } else {
       getUserRegistrations();
     }
@@ -33,14 +33,14 @@ const RegistrationList = ({ isAdmin = false }) => {
     return <Spinner />;
   }
   
-  const registrations = isAdmin ? pendingRegistrations : myRegistrations;
+  const registrations = isAdmin ? adminRegistrations : myRegistrations;
   
   if (!registrations || registrations.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 text-center">
         <p className="text-gray-600">
           {isAdmin
-            ? (isRtl ? 'لا توجد تسجيلات معلقة للموافقة عليها' : 'No pending registrations to approve')
+            ? (isRtl ? 'لا توجد تسجيلات للإدارة' : 'No registrations to manage')
             : (isRtl ? 'ليس لديك أي تسجيلات حتى الآن' : 'You don\'t have any registrations yet')}
         </p>
         {!isAdmin && (

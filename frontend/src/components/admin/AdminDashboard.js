@@ -1,20 +1,22 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { EventContext } from '../../contexts/event/eventContext';
-import { RegistrationContext } from '../../contexts/registration/registrationContext';
-import { RtlContext } from '../../contexts/rtl/rtlContext';
+import useEventContext from '../../contexts/event/eventContext';
+import useRegistrationContext from '../../contexts/registration/registrationContext';
+import useRtlContext from '../../contexts/rtl/rtlContext';
 import Spinner from '../layout/Spinner';
+import Alert from '../layout/Alert';
 
 const AdminDashboard = () => {
-  const eventContext = useContext(EventContext);
-  const registrationContext = useContext(RegistrationContext);
-  const rtlContext = useContext(RtlContext);
+  const eventContext = useEventContext();
+  const registrationContext = useRegistrationContext();
+  const rtlContext = useRtlContext();
   
-  const { events, loading: eventsLoading, getEvents } = eventContext;
+  const { events, loading: eventsLoading, getEvents, error: eventError } = eventContext;
   const { 
     pendingRegistrations, 
     getPendingRegistrations, 
-    loading: registrationsLoading 
+    loading: registrationsLoading,
+    error: registrationError 
   } = registrationContext;
   const { isRtl } = rtlContext;
   
@@ -36,8 +38,9 @@ const AdminDashboard = () => {
     if (events && !eventsLoading) {
       const now = new Date();
       const upcoming = events.filter(event => new Date(event.date) > now).length;
-      const totalCapacity = events.reduce((acc, event) => acc + event.capacity, 0);
-      const totalRegistered = events.reduce((acc, event) => acc + (event.capacity - event.availableSpots), 0);
+      const totalCapacity = events.reduce((acc, event) => acc + (event.capacity || 0), 0);
+      const totalRegistered = events.reduce((acc, event) => 
+        acc + ((event.capacity || 0) - (event.availableSpots || 0)), 0);
       
       setStats({
         totalEvents: events.length,
@@ -47,77 +50,57 @@ const AdminDashboard = () => {
         totalRegistered
       });
     }
-  }, [events, pendingRegistrations, eventsLoading, registrationsLoading]);
+  }, [events, pendingRegistrations, eventsLoading]);
   
   if (eventsLoading || registrationsLoading) {
     return <Spinner />;
   }
-  
+
   return (
-    <div className={`${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h1 className="text-2xl font-bold mb-6">
-          {isRtl ? 'لوحة التحكم الإدارية' : 'Admin Dashboard'}
-        </h1>
+    <div className={`container mx-auto px-4 py-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      {(eventError || registrationError) && (
+        <Alert 
+          type="error" 
+          message={eventError || registrationError} 
+        />
+      )}
+      
+      <h1 className="text-2xl font-bold mb-8">
+        {isRtl ? 'لوحة التحكم' : 'Admin Dashboard'}
+      </h1>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            {isRtl ? 'إجمالي الفعاليات' : 'Total Events'}
+          </h3>
+          <p className="text-3xl font-bold text-primary-600">{stats.totalEvents}</p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <h2 className="text-lg font-semibold text-blue-800">
-              {isRtl ? 'إجمالي الأحداث' : 'Total Events'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">{stats.totalEvents}</p>
-            <Link 
-              to="/admin/events" 
-              className="text-blue-600 text-sm hover:underline mt-2 inline-block"
-            >
-              {isRtl ? 'إدارة الأحداث' : 'Manage Events'}
-            </Link>
-          </div>
-          
-          <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-            <h2 className="text-lg font-semibold text-green-800">
-              {isRtl ? 'الأحداث القادمة' : 'Upcoming Events'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">{stats.upcomingEvents}</p>
-          </div>
-          
-          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-            <h2 className="text-lg font-semibold text-yellow-800">
-              {isRtl ? 'التسجيلات المعلقة' : 'Pending Registrations'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">{stats.pendingRegistrations}</p>
-            <Link 
-              to="/admin/registrations" 
-              className="text-yellow-600 text-sm hover:underline mt-2 inline-block"
-            >
-              {isRtl ? 'إدارة التسجيلات' : 'Manage Registrations'}
-            </Link>
-          </div>
-          
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-            <h2 className="text-lg font-semibold text-purple-800">
-              {isRtl ? 'إجمالي السعة' : 'Total Capacity'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">{stats.totalCapacity}</p>
-          </div>
-          
-          <div className="bg-pink-50 p-4 rounded-lg border border-pink-100">
-            <h2 className="text-lg font-semibold text-pink-800">
-              {isRtl ? 'إجمالي المسجلين' : 'Total Registered'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">{stats.totalRegistered}</p>
-          </div>
-          
-          <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
-            <h2 className="text-lg font-semibold text-indigo-800">
-              {isRtl ? 'معدل الإشغال' : 'Occupancy Rate'}
-            </h2>
-            <p className="text-3xl font-bold mt-2">
-              {stats.totalCapacity > 0 
-                ? `${Math.round((stats.totalRegistered / stats.totalCapacity) * 100)}%` 
-                : '0%'}
-            </p>
-          </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            {isRtl ? 'الفعاليات القادمة' : 'Upcoming Events'}
+          </h3>
+          <p className="text-3xl font-bold text-green-600">{stats.upcomingEvents}</p>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            {isRtl ? 'التسجيلات المعلقة' : 'Pending Registrations'}
+          </h3>
+          <p className="text-3xl font-bold text-yellow-600">{stats.pendingRegistrations}</p>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            {isRtl ? 'نسبة الإشغال' : 'Occupancy Rate'}
+          </h3>
+          <p className="text-3xl font-bold text-blue-600">
+            {stats.totalCapacity > 0 
+              ? `${Math.round((stats.totalRegistered / stats.totalCapacity) * 100)}%`
+              : '0%'
+            }
+          </p>
         </div>
       </div>
       
@@ -150,7 +133,9 @@ const AdminDashboard = () => {
                     {pendingRegistrations.slice(0, 5).map(reg => (
                       <tr key={reg._id} className="border-t hover:bg-gray-50">
                         <td className="py-2 px-3">
-                          {reg.event.title || 'Loading...'}
+                          <Link to={`/events/${reg.event._id}`} className="text-primary-600 hover:underline">
+                            {reg.event.title || 'Loading...'}
+                          </Link>
                         </td>
                         <td className="py-2 px-3">
                           {reg.user ? (reg.user.username || reg.user.email) : 'Unknown User'}
@@ -225,15 +210,6 @@ const AdminDashboard = () => {
             </p>
           )}
         </div>
-      </div>
-      
-      <div className="mt-6 flex justify-center">
-        <Link
-          to="/admin/events/new"
-          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition duration-200"
-        >
-          {isRtl ? 'إنشاء حدث جديد' : 'Create New Event'}
-        </Link>
       </div>
     </div>
   );

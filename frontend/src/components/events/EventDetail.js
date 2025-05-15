@@ -43,11 +43,24 @@ const EventDetail = () => {
     // Check if user is already registered for this event
     if (myRegistrations && myRegistrations.length > 0 && event) {
       const registration = myRegistrations.find(
-        reg => reg.event._id === event._id || reg.event === event._id
+        reg => {
+          // Handle both populated and unpopulated event references
+          const eventId = typeof reg.event === 'object' ? reg.event._id : reg.event;
+          return eventId === event._id;
+        }
       );
       
       if (registration) {
         setAlreadyRegistered(true);
+        // Update alert if registration is pending
+        if (registration.status === 'pending') {
+          setAlert({ 
+            type: 'info', 
+            message: isRtl 
+              ? 'طلب التسجيل الخاص بك قيد المراجعة' 
+              : 'Your registration request is under review' 
+          });
+        }
       } else {
         setAlreadyRegistered(false);
       }
@@ -56,19 +69,41 @@ const EventDetail = () => {
     // eslint-disable-next-line
   }, [error, myRegistrations, event]);
   
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: `/events/${id}` } });
       return;
     }
     
-    registerForEvent(id);
-    setAlert({ type: 'success', message: 'Registration request submitted! Awaiting approval.' });
+    try {
+      await registerForEvent(id);
+      setAlert({ 
+        type: 'success', 
+        message: isRtl 
+          ? 'تم تقديم طلب التسجيل! في انتظار الموافقة.' 
+          : 'Registration request submitted! Awaiting approval.' 
+      });
+      setAlreadyRegistered(true);
+    } catch (err) {
+      setAlert({ 
+        type: 'error', 
+        message: err.response?.data?.error || (isRtl 
+          ? 'حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.' 
+          : 'An error occurred during registration. Please try again.') 
+      });
+    }
   };
   
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString(isRtl ? 'ar-SA' : 'en-US', options);
+  };
+  
+  // Function to check if event has already passed
+  const isEventPassed = (dateString) => {
+    const eventDate = new Date(dateString);
+    const currentDate = new Date();
+    return eventDate < currentDate;
   };
   
   if (loading || !event) {
@@ -77,6 +112,7 @@ const EventDetail = () => {
   
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
   const hasAvailableSpots = event.availableSpots > 0;
+  const isPastEvent = isEventPassed(event.date);
   
   return (
     <div className={`container mx-auto px-4 py-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -124,6 +160,14 @@ const EventDetail = () => {
                     )}
                   </p>
                 </div>
+                
+                {isPastEvent && (
+                  <div className="mb-4">
+                    <p className="text-red-600 font-medium">
+                      {isRtl ? 'هذا الحدث قد انتهى' : 'This event has passed'}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -136,6 +180,10 @@ const EventDetail = () => {
                   {isRtl ? 'يمكنك التحقق من حالة التسجيل في صفحة "تسجيلاتي"' : 
                     'You can check your registration status on "My Registrations" page'}
                 </p>
+              </div>
+            ) : isPastEvent ? (
+              <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded">
+                <p>{isRtl ? 'هذا الحدث قد انتهى ولا يمكن التسجيل فيه' : 'This event has passed and registration is closed'}</p>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row justify-between items-center">
@@ -151,9 +199,9 @@ const EventDetail = () => {
                 
                 <button
                   onClick={handleRegister}
-                  disabled={!hasAvailableSpots || alreadyRegistered || (isAdmin && !isAuthenticated)}
+                  disabled={!hasAvailableSpots || alreadyRegistered || isPastEvent || (isAdmin && !isAuthenticated)}
                   className={`px-6 py-2 rounded-lg font-medium 
-                    ${(!hasAvailableSpots || alreadyRegistered) 
+                    ${(!hasAvailableSpots || alreadyRegistered || isPastEvent) 
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                       : 'bg-primary-600 text-white hover:bg-primary-700 transition duration-200'}`}
                 >
