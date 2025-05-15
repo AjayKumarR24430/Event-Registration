@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useEventContext from '../contexts/event/eventContext';
 import useAuthContext from '../contexts/auth/authContext';
 import EventList from '../components/events/EventList';
@@ -6,38 +6,28 @@ import SearchEvents from '../components/events/SearchEvents';
 import EventForm from '../components/events/EventForm';
 
 const EventsPage = () => {
-  const { getEvents, events, loading } = useEventContext();
+  const { events, loading, getEvents } = useEventContext();
   const { user } = useAuthContext();
   const [showAddEventForm, setShowAddEventForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    getEvents();
-  }, []);
+    const loadInitialEvents = async () => {
+      try {
+        await getEvents();
+      } finally {
+        setIsInitialLoad(false);
+      }
+    };
+    
+    if (isInitialLoad) {
+      loadInitialEvents();
+    }
+  }, [isInitialLoad, getEvents]);
 
   const toggleAddEventForm = () => {
     setShowAddEventForm(!showAddEventForm);
   };
-
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-  };
-
-  const handleDateFilter = (date) => {
-    setDateFilter(date);
-  };
-
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesDate = dateFilter ? 
-      new Date(event.date).toLocaleDateString() === new Date(dateFilter).toLocaleDateString() : 
-      true;
-    
-    return matchesSearch && matchesDate;
-  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -60,12 +50,7 @@ const EventsPage = () => {
       )}
 
       <div className="mb-8">
-        <SearchEvents 
-          onSearch={handleSearch} 
-          onDateFilter={handleDateFilter} 
-          currentSearchTerm={searchTerm}
-          currentDateFilter={dateFilter}
-        />
+        <SearchEvents />
       </div>
 
       {loading ? (
@@ -73,10 +58,10 @@ const EventsPage = () => {
           <div className="loader">Loading...</div>
         </div>
       ) : (
-        <EventList events={filteredEvents} />
+        <EventList events={events} />
       )}
 
-      {!loading && filteredEvents.length === 0 && (
+      {!loading && events.length === 0 && (
         <div className="text-center my-12">
           <p className="text-xl text-gray-600">No events found matching your criteria</p>
         </div>

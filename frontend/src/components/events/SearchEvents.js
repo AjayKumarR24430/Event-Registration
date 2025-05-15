@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useEventContext from '../../contexts/event/eventContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
+import { toast } from 'react-toastify';
 
 const SearchEvents = () => {
   const { searchEvents, clearSearch, loading, error } = useEventContext();
   const { isRtl } = useRtlContext();
   
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTitle, setSearchTitle] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
   const [searchPerformed, setSearchPerformed] = useState(false);
@@ -15,33 +16,42 @@ const SearchEvents = () => {
     e.preventDefault();
     setSearchPerformed(true);
     
+    // Validate that at least one field has a value
+    if (searchTitle.trim() === '' && searchDate === '' && searchCategory === '') {
+      toast.error(isRtl 
+        ? 'يرجى تحديد معيار بحث واحد على الأقل'
+        : 'Please provide at least one search criteria');
+      return;
+    }
+    
     try {
-      // Only search if at least one field has a value
-      if (searchTerm.trim() === '' && searchDate === '' && searchCategory === '') {
-        await clearSearch();
-        return;
-      }
+      const searchParams = {
+        ...(searchTitle.trim() && { title: searchTitle.trim() }),
+        ...(searchDate && { date: searchDate }),
+        ...(searchCategory && { category: searchCategory })
+      };
       
-      await searchEvents({
-        term: searchTerm.trim(),
-        date: searchDate,
-        category: searchCategory
-      });
+      await searchEvents(searchParams);
     } catch (err) {
       console.error('Search error:', err);
+      toast.error(err.message || (isRtl 
+        ? 'حدث خطأ أثناء البحث'
+        : 'An error occurred while searching'));
     }
   };
   
   const handleClear = async () => {
-    setSearchTerm('');
+    setSearchTitle('');
     setSearchDate('');
     setSearchCategory('');
     setSearchPerformed(false);
     await clearSearch();
+    toast.info(isRtl 
+      ? 'تم مسح معايير البحث'
+      : 'Search criteria cleared');
   };
 
   const handleKeyPress = async (e) => {
-    // Trigger search on Enter key in the title field
     if (e.key === 'Enter') {
       e.preventDefault();
       await handleSearch(e);
@@ -53,14 +63,14 @@ const SearchEvents = () => {
       <form onSubmit={handleSearch} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="searchTitle" className="block text-sm font-medium text-gray-700 mb-1">
               {isRtl ? 'البحث عن الفعاليات' : 'Search Events'}
             </label>
             <input
               type="text"
-              id="searchTerm"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              id="searchTitle"
+              value={searchTitle}
+              onChange={e => setSearchTitle(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={isRtl ? 'ابحث بالعنوان' : 'Search by title'}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -101,7 +111,7 @@ const SearchEvents = () => {
         </div>
         
         {error && searchPerformed && (
-          <div className="text-red-600 text-sm mt-2">
+          <div className="text-red-600 text-sm mt-2 bg-red-50 p-2 rounded">
             {error}
           </div>
         )}

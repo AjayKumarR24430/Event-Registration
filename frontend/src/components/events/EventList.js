@@ -1,35 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import useEventContext from '../../contexts/event/eventContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 import EventItem from './EventItem';
 import { sortEventsByDate } from '../../utils/dateFormatter';
 
-const EventList = () => {
-  const { events, getEvents, loading, filtered } = useEventContext();
+const EventList = ({ events }) => {
   const { t } = useRtlContext();
-  
   const [sortedEvents, setSortedEvents] = useState([]);
   
   useEffect(() => {
-    getEvents();
-    // eslint-disable-next-line
-  }, []);
-  
-  useEffect(() => {
-    if (filtered) {
-      setSortedEvents(sortEventsByDate(filtered));
-    } else if (events) {
+    if (events) {
       setSortedEvents(sortEventsByDate(events));
     }
-  }, [events, filtered]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
+  }, [events]);
 
   return (
     <div>      

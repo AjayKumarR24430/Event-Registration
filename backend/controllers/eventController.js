@@ -7,7 +7,10 @@ const { cacheData, getCachedData, deleteCachedData } = require('../utils/redisUt
 exports.getEvents = async (req, res, next) => {
   try {
     // Check cache first
-    const cacheKey = 'events:list';
+    const cacheKey = req.query.title || req.query.category || req.query.date 
+      ? `events:search:${JSON.stringify(req.query)}` 
+      : 'events:list';
+    
     const cachedEvents = await getCachedData(cacheKey);
     
     if (cachedEvents) {
@@ -19,7 +22,7 @@ exports.getEvents = async (req, res, next) => {
     }
 
     // Query parameters
-    const { title, date } = req.query;
+    const { title, category, date } = req.query;
     let query = {};
     
     // Filter by title
@@ -35,19 +38,27 @@ exports.getEvents = async (req, res, next) => {
     // Filter by date
     if (date) {
       const searchDate = new Date(date);
-      const nextDay = new Date(searchDate);
-      nextDay.setDate(nextDay.getDate() + 1);
       
-      query.date = {
-        $gte: searchDate,
-        $lt: nextDay
-      };
+      // Ensure valid date format
+      if (!isNaN(searchDate.getTime())) {
+        // Set the time to 00:00:00 for the start date
+        searchDate.setHours(0, 0, 0, 0);
+        
+        // Create end date as 23:59:59 of the same day
+        const nextDay = new Date(searchDate);
+        nextDay.setHours(23, 59, 59, 999);
+        
+        query.date = {
+          $gte: searchDate,
+          $lt: nextDay
+        };
+      }
     }
     
     // Sort by date, most recent first
     const events = await Event.find(query).sort({ date: 1 });
     
-    // Cache results
+    // Cache results with a specific key for the search
     await cacheData(cacheKey, events);
     
     res.status(200).json({

@@ -35,16 +35,24 @@ const EventState = (props) => {
       const queryParams = new URLSearchParams();
       
       // Only add parameters that have values
-      Object.entries(searchParams).forEach(([key, value]) => {
-        if (value && value.trim() !== '') {
-          queryParams.append(key, value);
-        }
-      });
+      if (searchParams.title && searchParams.title.trim()) {
+        queryParams.append('title', searchParams.title.trim());
+      }
+      
+      if (searchParams.date && searchParams.date.trim()) {
+        queryParams.append('date', searchParams.date.trim());
+      }
+      
+      if (searchParams.category && searchParams.category.trim()) {
+        queryParams.append('category', searchParams.category.trim());
+      }
 
       const queryString = queryParams.toString();
       const url = `/events${queryString ? `?${queryString}` : ''}`;
       
-      console.log('Fetching events with URL:', url); // Debug log
+      // Add stack trace to debug where the call is coming from
+      console.log('Fetching events with URL:', url);
+      console.log('Call stack:', new Error().stack);
       
       const res = await api.get(url);
       
@@ -55,7 +63,7 @@ const EventState = (props) => {
 
       return res.data.data;
     } catch (err) {
-      console.error('Error fetching events:', err); // Debug log
+      console.error('Error fetching events:', err);
       dispatch({
         type: EVENT_ERROR,
         payload: err.response?.data?.error || 'Failed to fetch events'
@@ -71,31 +79,40 @@ const EventState = (props) => {
       // Clean up search parameters
       const cleanParams = {};
       
-      if (searchParams.term) {
-        cleanParams.title = searchParams.term;
+      if (searchParams.title && searchParams.title.trim()) {
+        cleanParams.title = searchParams.title.trim();
       }
       
-      if (searchParams.date) {
-        cleanParams.date = searchParams.date;
+      if (searchParams.date && searchParams.date.trim()) {
+        cleanParams.date = searchParams.date.trim();
       }
       
-      if (searchParams.category) {
-        cleanParams.category = searchParams.category;
+      if (searchParams.category && searchParams.category.trim()) {
+        cleanParams.category = searchParams.category.trim();
       }
 
       // Only perform search if we have at least one search parameter
       const hasSearchParams = Object.values(cleanParams).some(value => value && value.trim() !== '');
       
       if (!hasSearchParams) {
-        return await getEvents(); // If no search params, get all events
+        throw new Error('Please provide at least one search criteria');
       }
 
-      return await getEvents(cleanParams);
+      const events = await getEvents(cleanParams);
+      
+      if (events.length === 0) {
+        dispatch({
+          type: EVENT_ERROR,
+          payload: 'No events found matching your search criteria'
+        });
+      }
+
+      return events;
     } catch (err) {
-      console.error('Error searching events:', err); // Debug log
+      console.error('Error searching events:', err);
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to search events'
+        payload: err.message || 'Failed to search events'
       });
       throw err;
     }
@@ -181,6 +198,7 @@ const EventState = (props) => {
 
   // Clear Event
   const clearEvent = () => {
+    console.log('Clear event called from:', new Error().stack);
     dispatch({ type: CLEAR_EVENT });
   };
 
@@ -197,6 +215,13 @@ const EventState = (props) => {
   // Set Loading
   const setLoading = () => dispatch({ type: SET_LOADING });
 
+  // Clear Search - Modified to prevent unnecessary fetches
+  const clearSearch = () => {
+    console.log('Clear search called from:', new Error().stack);
+    dispatch({ type: CLEAR_EVENT });
+    return getEvents(); // Only fetch all events when explicitly clearing
+  };
+
   return (
     <eventContext.Provider
       value={{
@@ -212,7 +237,7 @@ const EventState = (props) => {
         deleteEvent,
         clearEvent,
         searchEvents,
-        clearSearch: () => getEvents()
+        clearSearch
       }}
     >
       {props.children}
