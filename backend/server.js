@@ -28,9 +28,15 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+// CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL || 'https://your-production-domain.com' : 'http://localhost:3000',
-  credentials: true
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL || 'https://your-production-domain.com' 
+    : 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parser
@@ -55,7 +61,7 @@ app.use(compression());
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100000, // limit each IP to 100 requests per windowMs
+  max: 100000, // limit each IP to 100000 requests per windowMs
   message: 'Too many requests from this IP, please try again after 15 minutes',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false // Disable the `X-RateLimit-*` headers
@@ -65,7 +71,7 @@ app.use('/api', apiLimiter);
 // More strict rate limit for auth routes
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10000, // 10 requests per hour
+  max: 100000, // 100000 requests per hour
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false
