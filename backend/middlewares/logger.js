@@ -9,20 +9,23 @@ const logFormat = winston.format.combine(
   })
 );
 
-// Create logger
+// Create logger with different transports based on environment
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
   format: logFormat,
   transports: [
-    // Write logs to file
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/app.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }),
-    // Console output in development mode
+    // Always use Console transport
+    new winston.transports.Console(),
+    
+    // Only use File transport in development
     ...(process.env.NODE_ENV === 'development' 
-      ? [new winston.transports.Console()] 
+      ? [
+          new winston.transports.File({ 
+            filename: path.join(__dirname, '../logs/app.log'),
+            maxsize: 5242880, // 5MB
+            maxFiles: 5
+          })
+        ] 
       : [])
   ]
 });
