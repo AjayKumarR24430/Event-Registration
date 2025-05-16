@@ -26,6 +26,8 @@ setupRedis();
 // Initialize Express
 const app = express();
 
+app.set('trust proxy', 1);
+
 // CORS Configuration based on environment
 const allowedOrigins = [
   'https://event-registration-rho.vercel.app',    // Production frontend
