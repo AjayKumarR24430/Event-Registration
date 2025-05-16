@@ -26,11 +26,25 @@ setupRedis();
 // Initialize Express
 const app = express();
 
-app.use(cors({
-  origin: ['https://event-registration-rho.vercel.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true
+// CORS must come before other middleware
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://event-registration-rho.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// Security middleware with CORS-friendly config
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "same-origin" },
+  contentSecurityPolicy: false
 }));
 
 // Body parser
@@ -51,12 +65,6 @@ app.use(hpp({
 
 // Compress responses
 app.use(compression());
-
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "same-origin" }
-}));
 
 // Rate limiting
 const apiLimiter = rateLimit({
