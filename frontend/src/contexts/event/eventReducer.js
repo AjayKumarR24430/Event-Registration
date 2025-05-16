@@ -19,10 +19,11 @@ const eventReducer = (state, action) => {
           loading: true
         };
       case GET_EVENTS:
+        const events = action.payload || [];
         return {
           ...state,
-          events: action.payload,
-          error: action.payload.length > 0 ? null : state.error,
+          events,
+          error: events.length > 0 ? null : state.error,
           loading: false
         };
       case GET_EVENT:

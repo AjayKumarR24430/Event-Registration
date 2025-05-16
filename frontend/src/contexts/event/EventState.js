@@ -53,7 +53,9 @@ const EventState = (props) => {
       const queryString = queryParams.toString();
       const url = `/events${queryString ? `?${queryString}` : ''}`;
       
+      console.log('Fetching events from:', url); // Debug log
       const res = await api.get(url);
+      console.log('API Response:', res.data); // Debug log
       
       dispatch({
         type: GET_EVENTS,
@@ -63,6 +65,13 @@ const EventState = (props) => {
       return res.data.data;
     } catch (err) {
       console.error('Error fetching events:', err);
+      console.error('Error details:', {
+        message: err.message,
+        code: err.code,
+        response: err.response,
+        request: err.request
+      }); // More detailed error logging
+      
       let errorMessage;
       
       if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
