@@ -101,13 +101,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Mount routes (without /api prefix for Vercel deployment)
-app.use('/auth', require('./routes/auth'));
-app.use('/events', require('./routes/events'));
-app.use('/registrations', require('./routes/registrations'));
-app.use('/admin', require('./routes/admin'));
-app.use('/superadmin', require('./routes/superAdmin'));
-app.use('/health', require('./routes/health'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/events', require('./routes/events'));
+app.use('/api/registrations', require('./routes/registrations'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/superadmin', require('./routes/superAdmin'));
+app.use('/api/health', require('./routes/health'));
 
 // Root route
 app.get('/', (req, res) => {
@@ -127,11 +126,11 @@ app.use('*', (req, res) => {
     success: false,
     error: `Route not found: ${requestedUrl}`,
     availableRoutes: {
-      auth: '/auth/*',
-      events: '/events/*',
-      registrations: '/registrations/*',
-      admin: '/admin/*',
-      health: '/health'
+      auth: '/api/auth/*',
+      events: '/api/events/*',
+      registrations: '/api/registrations/*',
+      admin: '/api/admin/*',
+      health: '/api/health'
     }
   });
 });
