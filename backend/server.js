@@ -26,16 +26,25 @@ setupRedis();
 // Initialize Express
 const app = express();
 
-// CORS must come before other middleware
+// CORS Configuration based on environment
+const allowedOrigins = [
+  'https://event-registration-rho.vercel.app',    // Production frontend
+  'http://localhost:3000'                         // Development frontend
+];
+
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://event-registration-rho.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
-  // Handle preflight
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).json({
+      body: "OK"
+    });
   }
   next();
 });
@@ -92,15 +101,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Mount routers
-app.use('/api/superadmin', superAdminRoutes);
-
-// Mount routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/events', require('./routes/events'));
-app.use('/api/registrations', require('./routes/registrations'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/health', require('./routes/health')); // Add health check routes
+// Mount routes (without /api prefix for Vercel deployment)
+app.use('/auth', require('./routes/auth'));
+app.use('/events', require('./routes/events'));
+app.use('/registrations', require('./routes/registrations'));
+app.use('/admin', require('./routes/admin'));
+app.use('/superadmin', require('./routes/superAdmin'));
+app.use('/health', require('./routes/health'));
 
 // Root route
 app.get('/', (req, res) => {
@@ -111,45 +118,37 @@ app.get('/', (req, res) => {
   });
 });
 
-// Handle 404 routes
+// Handle 404 routes with better error messages
 app.use('*', (req, res) => {
+  const requestedUrl = req.originalUrl;
+  logger.warn(`404 - Route not found: ${requestedUrl}`);
+  
   res.status(404).json({
     success: false,
-    error: `Route not found: ${req.originalUrl}`
+    error: `Route not found: ${requestedUrl}`,
+    availableRoutes: {
+      auth: '/auth/*',
+      events: '/events/*',
+      registrations: '/registrations/*',
+      admin: '/admin/*',
+      health: '/health'
+    }
   });
 });
 
 // Error handling middleware
 app.use(errorMiddleware);
 
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-  logger.error(`Unhandled Rejection: ${err.message}`);
-  logger.error(err.stack);
-  // Close server & exit process
-  server.close(() => process.exit(1));
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  logger.error(`Uncaught Exception: ${err.message}`);
-  logger.error(err.stack);
-  // Close server & exit process
-  server.close(() => process.exit(1));
-});
-
-// Handle SIGTERM signal (e.g., when deployed in containers)
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM signal received. Shutting down gracefully');
-  server.close(() => {
-    logger.info('Process terminated');
+// Start server only in development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    logger.info(`Development server running on port ${PORT}`);
   });
-});
+} else {
+  // In production (Vercel), we export the app
+  logger.info('Production environment detected');
+}
 
-module.exports = server; // Export for testing
+// Export the Express API
+module.exports = app;
