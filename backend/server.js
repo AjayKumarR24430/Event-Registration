@@ -112,7 +112,7 @@ app.use('/health', require('./routes/health'));
 // Root route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Event Registration API is running',
+    message: 'Event Management APIs are running',
     version: process.env.npm_package_version || '1.0.0',
     environment: process.env.NODE_ENV
   });
