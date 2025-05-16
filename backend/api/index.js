@@ -25,13 +25,22 @@ connectDB();
 // Set up Redis
 setupRedis();
 
-// CORS Configuration
-app.use(cors({
-  origin: ['https://event-registration-rho.vercel.app', 'http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  credentials: true
-}));
+// CORS Configuration - Must be before any route definitions
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://event-registration-rho.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle OPTIONS method
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({
+      body: "OK"
+    });
+  }
+  
+  next();
+});
 
 // Body parser
 app.use(express.json({ limit: '10kb' }));
@@ -73,9 +82,29 @@ app.get('/api', (req, res) => {
 
 // Handle 404 routes
 app.use('*', (req, res) => {
+  const requestedUrl = req.originalUrl;
+  logger.warn(`404 - Route not found: ${requestedUrl}`);
+  
+  // Check if it's an API route without the /api prefix
+  if (!requestedUrl.startsWith('/api') && requestedUrl !== '/') {
+    logger.info(`Suggesting API route correction for: ${requestedUrl}`);
+    return res.status(404).json({
+      success: false,
+      error: `Route not found: ${requestedUrl}`,
+      suggestion: `Did you mean to use: /api${requestedUrl}?`
+    });
+  }
+  
   res.status(404).json({
     success: false,
-    error: `Route not found: ${req.originalUrl}`
+    error: `Route not found: ${requestedUrl}`,
+    availableRoutes: {
+      auth: '/api/auth/*',
+      events: '/api/events/*',
+      registrations: '/api/registrations/*',
+      admin: '/api/admin/*',
+      health: '/api/health'
+    }
   });
 });
 
