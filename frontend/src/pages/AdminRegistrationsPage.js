@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useRegistrationContext from '../contexts/registration/registrationContext';
 import useAuthContext from '../contexts/auth/authContext';
@@ -7,8 +7,10 @@ import Spinner from '../components/layout/Spinner';
 
 const AdminRegistrationsPage = () => {
   const { 
-    getAdminRegistrations, 
-    adminRegistrations, 
+    getAdminRegistrations,
+    getAdminStats, 
+    adminRegistrations,
+    stats, 
     loading, 
     approveRegistration, 
     rejectRegistration 
@@ -19,13 +21,16 @@ const AdminRegistrationsPage = () => {
   const [filter, setFilter] = useState('pending');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const fetchRegistrations = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      await getAdminRegistrations();
+      await Promise.all([
+        getAdminRegistrations(),
+        getAdminStats()
+      ]);
     } catch (error) {
-      console.error('Error fetching registrations:', error);
+      console.error('Error fetching data:', error);
     }
-  }, [getAdminRegistrations]);
+  }, [getAdminRegistrations, getAdminStats]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -39,34 +44,34 @@ const AdminRegistrationsPage = () => {
     }
 
     if (isInitialLoad) {
-      fetchRegistrations().then(() => {
+      fetchData().then(() => {
         setIsInitialLoad(false);
       });
     }
-  }, [isAuthenticated, user, navigate, isInitialLoad, fetchRegistrations]);
+  }, [isAuthenticated, user, navigate, isInitialLoad, fetchData]);
 
-  const handleApprove = async (registrationId) => {
+  const handleApprove = useCallback(async (registrationId) => {
     try {
       await approveRegistration(registrationId);
-      await fetchRegistrations();
     } catch (error) {
       console.error('Error approving registration:', error);
     }
-  };
+  }, [approveRegistration]);
 
-  const handleReject = async (registrationId, reason) => {
+  const handleReject = useCallback(async (registrationId, reason) => {
     try {
       await rejectRegistration(registrationId, reason);
-      await fetchRegistrations();
     } catch (error) {
       console.error('Error rejecting registration:', error);
     }
-  };
+  }, [rejectRegistration]);
 
-  const filteredRegistrations = adminRegistrations?.filter(reg => {
-    if (filter === 'all') return true;
-    return reg.status === filter;
-  }) || [];
+  const filteredRegistrations = useMemo(() => {
+    return adminRegistrations?.filter(reg => {
+      if (filter === 'all') return true;
+      return reg.status === filter;
+    }) || [];
+  }, [adminRegistrations, filter]);
 
   if (isInitialLoad && loading) {
     return (
@@ -89,34 +94,28 @@ const AdminRegistrationsPage = () => {
             onClick={() => setFilter('all')}
           >
             <p className="font-semibold">All</p>
-            <p className="text-2xl font-bold">{adminRegistrations?.length || 0}</p>
+            <p className="text-2xl font-bold">{stats?.registrations?.total || 0}</p>
           </div>
           <div 
             className={`cursor-pointer text-center p-4 rounded-lg ${filter === 'pending' ? 'bg-yellow-100 border-yellow-300 border' : 'bg-gray-100'}`}
             onClick={() => setFilter('pending')}
           >
             <p className="font-semibold">Pending</p>
-            <p className="text-2xl font-bold">
-              {adminRegistrations?.filter(reg => reg.status === 'pending').length || 0}
-            </p>
+            <p className="text-2xl font-bold">{stats?.registrations?.pending || 0}</p>
           </div>
           <div 
             className={`cursor-pointer text-center p-4 rounded-lg ${filter === 'approved' ? 'bg-green-100 border-green-300 border' : 'bg-gray-100'}`}
             onClick={() => setFilter('approved')}
           >
             <p className="font-semibold">Approved</p>
-            <p className="text-2xl font-bold">
-              {adminRegistrations?.filter(reg => reg.status === 'approved').length || 0}
-            </p>
+            <p className="text-2xl font-bold">{stats?.registrations?.approved || 0}</p>
           </div>
           <div 
             className={`cursor-pointer text-center p-4 rounded-lg ${filter === 'rejected' ? 'bg-red-100 border-red-300 border' : 'bg-gray-100'}`}
             onClick={() => setFilter('rejected')}
           >
             <p className="font-semibold">Rejected</p>
-            <p className="text-2xl font-bold">
-              {adminRegistrations?.filter(reg => reg.status === 'rejected').length || 0}
-            </p>
+            <p className="text-2xl font-bold">{stats?.registrations?.rejected || 0}</p>
           </div>
         </div>
       </div>

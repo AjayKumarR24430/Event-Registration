@@ -6,6 +6,7 @@ import useRtlContext from '../../contexts/rtl/rtlContext';
 const RegistrationItem = ({ registration, isAdmin }) => {
   const registrationContext = useRegistrationContext();
   const rtlContext = useRtlContext();
+  const [isLoading, setIsLoading] = React.useState(false);
   
   const { approveRegistration, rejectRegistration, cancelRegistration } = registrationContext;
   const { isRtl } = rtlContext;
@@ -55,6 +56,42 @@ const RegistrationItem = ({ registration, isAdmin }) => {
   const user = registration.user || {};
   const username = user.username || user.email || 'Unknown User';
   
+  const handleApprove = async () => {
+    try {
+      setIsLoading(true);
+      await approveRegistration(registration._id);
+    } catch (error) {
+      console.error('Error approving registration:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setIsLoading(true);
+      const reason = window.prompt(isRtl ? 'الرجاء إدخال سبب الرفض:' : 'Please enter rejection reason:');
+      if (reason !== null) {
+        await rejectRegistration(registration._id, reason);
+      }
+    } catch (error) {
+      console.error('Error rejecting registration:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      setIsLoading(true);
+      await cancelRegistration(registration._id);
+    } catch (error) {
+      console.error('Error canceling registration:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <tr className="border-t hover:bg-gray-50">
       <td className="py-3 px-4">
@@ -82,26 +119,35 @@ const RegistrationItem = ({ registration, isAdmin }) => {
         {isAdmin && registration.status === 'pending' && (
           <div className="flex space-x-2 justify-end">
             <button
-              onClick={() => approveRegistration(registration._id)}
-              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition duration-200"
+              onClick={handleApprove}
+              disabled={isLoading}
+              className={`bg-green-600 text-white px-3 py-1 rounded text-sm transition duration-200 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
+              }`}
             >
-              {isRtl ? 'موافقة' : 'Approve'}
+              {isLoading ? (isRtl ? 'جارٍ...' : 'Loading...') : (isRtl ? 'موافقة' : 'Approve')}
             </button>
             <button
-              onClick={() => rejectRegistration(registration._id)}
-              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition duration-200"
+              onClick={handleReject}
+              disabled={isLoading}
+              className={`bg-red-600 text-white px-3 py-1 rounded text-sm transition duration-200 ${
+                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'
+              }`}
             >
-              {isRtl ? 'رفض' : 'Reject'}
+              {isLoading ? (isRtl ? 'جارٍ...' : 'Loading...') : (isRtl ? 'رفض' : 'Reject')}
             </button>
           </div>
         )}
         
         {!isAdmin && registration.status === 'pending' && (
           <button
-            onClick={() => cancelRegistration(registration._id)}
-            className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition duration-200"
+            onClick={handleCancel}
+            disabled={isLoading}
+            className={`bg-gray-600 text-white px-3 py-1 rounded text-sm transition duration-200 ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-700'
+            }`}
           >
-            {isRtl ? 'إلغاء' : 'Cancel'}
+            {isLoading ? (isRtl ? 'جارٍ...' : 'Loading...') : (isRtl ? 'إلغاء' : 'Cancel')}
           </button>
         )}
       </td>

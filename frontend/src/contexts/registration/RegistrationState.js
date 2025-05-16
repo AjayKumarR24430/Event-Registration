@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useCallback } from 'react';
 import { registrationContext } from './registrationContext';
 import registrationReducer from './registrationReducer';
 import api from '../../utils/api';
@@ -11,13 +11,15 @@ import {
   REGISTRATION_ERROR,
   CLEAR_REGISTRATION,
   GET_ADMIN_REGISTRATIONS,
-  SET_LOADING
+  SET_LOADING,
+  GET_ADMIN_STATS
 } from '../types';
 
 const RegistrationState = (props) => {
   const initialState = {
     registrations: [],
     adminRegistrations: [],
+    stats: null,
     current: null,
     error: null,
     loading: true
@@ -25,8 +27,11 @@ const RegistrationState = (props) => {
 
   const [state, dispatch] = useReducer(registrationReducer, initialState);
 
+  // Set Loading
+  const setLoading = useCallback(() => dispatch({ type: SET_LOADING }), []);
+
   // Get User Registrations
-  const getUserRegistrations = async () => {
+  const getUserRegistrations = useCallback(async () => {
     setLoading();
     try {
       const res = await api.get('/registrations');
@@ -41,28 +46,62 @@ const RegistrationState = (props) => {
         payload: err.response?.data?.error || 'Failed to fetch registrations'
       });
     }
-  };
+  }, [setLoading]);
 
-  // Get Admin Registrations
-  const getAdminRegistrations = async () => {
+  // Get Admin Stats
+  const getAdminStats = useCallback(async () => {
     setLoading();
     try {
-      const res = await api.get('/admin/registrations');
-
+      const res = await api.get('/admin/stats');
+      
       dispatch({
-        type: GET_ADMIN_REGISTRATIONS,
+        type: GET_ADMIN_STATS,
         payload: res.data.data
       });
+      
+      return res.data.data;
+    } catch (err) {
+      dispatch({
+        type: REGISTRATION_ERROR,
+        payload: err.response?.data?.error || 'Failed to fetch admin stats'
+      });
+    }
+  }, [setLoading]);
+
+  // Get Admin Registrations
+  const getAdminRegistrations = useCallback(async () => {
+    setLoading();
+    try {
+      // Fetch both registrations and stats in parallel
+      const [registrationsRes, statsRes] = await Promise.all([
+        api.get('/admin/registrations'),
+        api.get('/admin/stats')
+      ]);
+
+      // Update registrations first
+      dispatch({
+        type: GET_ADMIN_REGISTRATIONS,
+        payload: registrationsRes.data.data
+      });
+      
+      // Then update stats
+      dispatch({
+        type: GET_ADMIN_STATS,
+        payload: statsRes.data.data
+      });
+      
+      return registrationsRes.data.data;
     } catch (err) {
       dispatch({
         type: REGISTRATION_ERROR,
         payload: err.response?.data?.error || 'Failed to fetch admin registrations'
       });
+      throw err;
     }
-  };
+  }, [setLoading]);
 
   // Register for Event
-  const registerForEvent = async (eventId) => {
+  const registerForEvent = useCallback(async (eventId) => {
     setLoading();
     try {
       const res = await api.post(`/events/${eventId}/register`);
@@ -74,13 +113,11 @@ const RegistrationState = (props) => {
       
       return res.data.data;
     } catch (err) {
-      // Check if this is a duplicate registration error
       if (err.response?.status === 400 && err.response?.data?.error) {
         dispatch({
           type: REGISTRATION_ERROR,
           payload: err.response.data.error
         });
-        // Return the error data so we can check the registration status
         return err.response.data;
       }
       
@@ -90,10 +127,10 @@ const RegistrationState = (props) => {
       });
       throw err;
     }
-  };
+  }, [setLoading]);
 
   // Cancel Registration
-  const cancelRegistration = async (id) => {
+  const cancelRegistration = useCallback(async (id) => {
     setLoading();
     try {
       await api.delete(`/registrations/${id}`);
@@ -108,10 +145,10 @@ const RegistrationState = (props) => {
         payload: err.response?.data?.error || 'Failed to cancel registration'
       });
     }
-  };
+  }, [setLoading]);
 
   // Approve Registration
-  const approveRegistration = async (id) => {
+  const approveRegistration = useCallback(async (id) => {
     setLoading();
     try {
       const res = await api.put(`/admin/registrations/${id}/approve`);
@@ -121,6 +158,9 @@ const RegistrationState = (props) => {
         payload: res.data.data
       });
       
+      // Refresh admin registrations list
+      await getAdminRegistrations();
+      
       return res.data.data;
     } catch (err) {
       dispatch({
@@ -129,10 +169,10 @@ const RegistrationState = (props) => {
       });
       throw err;
     }
-  };
+  }, [setLoading, getAdminRegistrations]);
 
   // Reject Registration
-  const rejectRegistration = async (id, reason) => {
+  const rejectRegistration = useCallback(async (id, reason) => {
     setLoading();
     try {
       const res = await api.put(`/admin/registrations/${id}/reject`, { reason });
@@ -142,6 +182,9 @@ const RegistrationState = (props) => {
         payload: res.data.data
       });
       
+      // Refresh admin registrations list
+      await getAdminRegistrations();
+      
       return res.data;
     } catch (err) {
       dispatch({
@@ -150,21 +193,17 @@ const RegistrationState = (props) => {
       });
       throw err;
     }
-  };
+  }, [setLoading, getAdminRegistrations]);
 
   // Clear Registration
-  const clearRegistration = () => {
+  const clearRegistration = useCallback(() => {
     dispatch({ type: CLEAR_REGISTRATION });
-  };
-
-  // Set Loading
-  const setLoading = () => dispatch({ type: SET_LOADING });
+  }, []);
 
   // Get User Registration For Event
-  const getUserRegistrationForEvent = async (eventId) => {
+  const getUserRegistrationForEvent = useCallback(async (eventId) => {
     setLoading();
     try {
-      // Get all user registrations and filter for this event
       const res = await api.get('/registrations');
       const registration = res.data.data.find(reg => 
         (typeof reg.event === 'object' ? reg.event._id : reg.event) === eventId
@@ -178,18 +217,20 @@ const RegistrationState = (props) => {
       });
       return null;
     }
-  };
+  }, [setLoading]);
 
   return (
     <registrationContext.Provider
       value={{
         myRegistrations: state.registrations,
         adminRegistrations: state.adminRegistrations,
+        stats: state.stats,
         current: state.current,
         error: state.error,
         loading: state.loading,
         getUserRegistrations,
         getAdminRegistrations,
+        getAdminStats,
         getUserRegistrationForEvent,
         registerForEvent,
         cancelRegistration,

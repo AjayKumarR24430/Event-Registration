@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useEventContext from '../../contexts/event/eventContext';
 import useRegistrationContext from '../../contexts/registration/registrationContext';
@@ -14,7 +14,9 @@ const AdminDashboard = () => {
   const { events, loading: eventsLoading, getEvents, error: eventError } = eventContext;
   const { 
     pendingRegistrations, 
-    getPendingRegistrations, 
+    getPendingRegistrations,
+    getAdminStats,
+    stats: registrationStats,
     loading: registrationsLoading,
     error: registrationError 
   } = registrationContext;
@@ -27,47 +29,94 @@ const AdminDashboard = () => {
     totalCapacity: 0,
     totalRegistered: 0
   });
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const refreshData = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      await Promise.all([
+        getEvents(),
+        getPendingRegistrations(),
+        getAdminStats()
+      ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [getEvents, getPendingRegistrations, getAdminStats]);
   
   useEffect(() => {
-    getEvents();
-    getPendingRegistrations();
-    // eslint-disable-next-line
-  }, []);
+    refreshData();
+  }, [refreshData]);
   
   useEffect(() => {
-    if (events && !eventsLoading) {
+    if (events && !eventsLoading && registrationStats) {
       const now = new Date();
       const upcoming = events.filter(event => new Date(event.date) > now).length;
       const totalCapacity = events.reduce((acc, event) => acc + (event.capacity || 0), 0);
-      const totalRegistered = events.reduce((acc, event) => 
-        acc + ((event.capacity || 0) - (event.availableSpots || 0)), 0);
+      const totalRegistered = registrationStats?.registrations?.total || 0;
       
       setStats({
         totalEvents: events.length,
         upcomingEvents: upcoming,
-        pendingRegistrations: pendingRegistrations ? pendingRegistrations.length : 0,
+        pendingRegistrations: registrationStats?.registrations?.pending || 0,
         totalCapacity,
         totalRegistered
       });
     }
-  }, [events, pendingRegistrations, eventsLoading]);
+  }, [events, eventsLoading, registrationStats]);
   
   if (eventsLoading || registrationsLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Spinner />
+          <p className="mt-4 text-gray-600">
+            {isRtl ? 'جارٍ تحميل البيانات...' : 'Loading dashboard data...'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className={`container mx-auto px-4 py-8 ${isRtl ? 'rtl' : 'ltr'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">
+          {isRtl ? 'لوحة التحكم' : 'Admin Dashboard'}
+        </h1>
+        <button
+          onClick={refreshData}
+          disabled={isRefreshing}
+          className={`bg-primary-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center ${
+            isRefreshing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'
+          }`}
+        >
+          {isRefreshing ? (
+            <>
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+              {isRtl ? 'جارٍ التحديث...' : 'Refreshing...'}
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isRtl ? 'تحديث البيانات' : 'Refresh Data'}
+            </>
+          )}
+        </button>
+      </div>
+
       {(eventError || registrationError) && (
         <Alert 
           type="error" 
           message={eventError || registrationError} 
+          className="mb-6"
         />
       )}
-      
-      <h1 className="text-2xl font-bold mb-8">
-        {isRtl ? 'لوحة التحكم' : 'Admin Dashboard'}
-      </h1>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -96,10 +145,12 @@ const AdminDashboard = () => {
             {isRtl ? 'نسبة الإشغال' : 'Occupancy Rate'}
           </h3>
           <p className="text-3xl font-bold text-blue-600">
-            {stats.totalCapacity > 0 
-              ? `${Math.round((stats.totalRegistered / stats.totalCapacity) * 100)}%`
-              : '0%'
-            }
+            {stats.totalCapacity > 0
+              ? Math.round((stats.totalRegistered / stats.totalCapacity) * 100)
+              : 0}%
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            {stats.totalRegistered} / {stats.totalCapacity}
           </p>
         </div>
       </div>
@@ -127,6 +178,7 @@ const AdminDashboard = () => {
                       <th className="py-2 px-3 text-left">{isRtl ? 'الحدث' : 'Event'}</th>
                       <th className="py-2 px-3 text-left">{isRtl ? 'المستخدم' : 'User'}</th>
                       <th className="py-2 px-3 text-left">{isRtl ? 'التاريخ' : 'Date'}</th>
+                      <th className="py-2 px-3 text-left">{isRtl ? 'الإجراءات' : 'Actions'}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -142,6 +194,14 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-2 px-3">
                           {new Date(reg.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-2 px-3">
+                          <Link 
+                            to="/admin/registrations" 
+                            className="text-primary-600 hover:underline text-sm"
+                          >
+                            {isRtl ? 'إدارة' : 'Manage'}
+                          </Link>
                         </td>
                       </tr>
                     ))}
@@ -159,7 +219,7 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">
-              {isRtl ? 'الأحداث القادمة' : 'Upcoming Events'}
+              {isRtl ? 'الفعاليات' : 'Events'}
             </h2>
             <Link 
               to="/admin/events" 
@@ -175,38 +235,52 @@ const AdminDashboard = () => {
                 <table className="min-w-full">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="py-2 px-3 text-left">{isRtl ? 'الحدث' : 'Event'}</th>
+                      <th className="py-2 px-3 text-left">{isRtl ? 'الفعالية' : 'Event'}</th>
                       <th className="py-2 px-3 text-left">{isRtl ? 'التاريخ' : 'Date'}</th>
-                      <th className="py-2 px-3 text-left">{isRtl ? 'المقاعد المتاحة' : 'Available'}</th>
+                      <th className="py-2 px-3 text-left">{isRtl ? 'الحالة' : 'Status'}</th>
+                      <th className="py-2 px-3 text-left">{isRtl ? 'التسجيلات' : 'Registrations'}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {events
-                      .filter(event => new Date(event.date) > new Date())
                       .sort((a, b) => new Date(a.date) - new Date(b.date))
                       .slice(0, 5)
-                      .map(event => (
-                        <tr key={event._id} className="border-t hover:bg-gray-50">
-                          <td className="py-2 px-3">
-                            <Link to={`/events/${event._id}`} className="text-primary-600 hover:underline">
-                              {event.title}
-                            </Link>
-                          </td>
-                          <td className="py-2 px-3">
-                            {new Date(event.date).toLocaleDateString()}
-                          </td>
-                          <td className="py-2 px-3">
-                            {event.availableSpots} / {event.capacity}
-                          </td>
-                        </tr>
-                      ))}
+                      .map(event => {
+                        const now = new Date();
+                        const eventDate = new Date(event.date);
+                        const status = eventDate < now ? 'Past' : 'Upcoming';
+                        const registrationCount = event.capacity - (event.availableSpots || 0);
+                        
+                        return (
+                          <tr key={event._id} className="border-t hover:bg-gray-50">
+                            <td className="py-2 px-3">
+                              <Link to={`/admin/events/${event._id}`} className="text-primary-600 hover:underline">
+                                {event.title}
+                              </Link>
+                            </td>
+                            <td className="py-2 px-3">
+                              {new Date(event.date).toLocaleDateString()}
+                            </td>
+                            <td className="py-2 px-3">
+                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                status === 'Upcoming' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {status}
+                              </span>
+                            </td>
+                            <td className="py-2 px-3">
+                              {registrationCount} / {event.capacity}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
             </div>
           ) : (
             <p className="text-gray-500 text-center py-4">
-              {isRtl ? 'لا توجد أحداث قادمة' : 'No upcoming events'}
+              {isRtl ? 'لا توجد فعاليات' : 'No events available'}
             </p>
           )}
         </div>

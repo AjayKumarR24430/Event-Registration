@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useCallback } from 'react';
 import { eventContext } from './eventContext';
 import eventReducer from './eventReducer';
 import api from '../../utils/api';
@@ -27,8 +27,11 @@ const EventState = (props) => {
 
   const [state, dispatch] = useReducer(eventReducer, initialState);
 
+  // Set Loading
+  const setLoading = useCallback(() => dispatch({ type: SET_LOADING }), []);
+
   // Get Events with search parameters
-  const getEvents = async (searchParams = {}) => {
+  const getEvents = useCallback(async (searchParams = {}) => {
     setLoading();
     try {
       // Build query string from search parameters
@@ -50,8 +53,6 @@ const EventState = (props) => {
       const queryString = queryParams.toString();
       const url = `/events${queryString ? `?${queryString}` : ''}`;
       
-      console.log('Fetching events with URL:', url);
-      
       const res = await api.get(url);
       
       dispatch({
@@ -62,8 +63,14 @@ const EventState = (props) => {
       return res.data.data;
     } catch (err) {
       console.error('Error fetching events:', err);
-      const errorMessage = err.response?.data?.error || 
-        'Unable to fetch events. Please check your connection or try again later.';
+      let errorMessage;
+      
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        errorMessage = 'Unable to connect to server. Please check your connection.';
+      } else {
+        errorMessage = err.response?.data?.error || 
+          'Unable to fetch events. Please try again later.';
+      }
       
       dispatch({
         type: EVENT_ERROR,
@@ -76,9 +83,10 @@ const EventState = (props) => {
         payload: []
       });
       
-      throw err;
+      // Return empty array instead of throwing
+      return [];
     }
-  };
+  }, [setLoading]);
 
   // Search Events
   const searchEvents = async (searchParams) => {
@@ -103,7 +111,11 @@ const EventState = (props) => {
       const hasSearchParams = Object.values(cleanParams).some(value => value && value.trim() !== '');
       
       if (!hasSearchParams) {
-        throw new Error('Please provide at least one search criteria');
+        dispatch({
+          type: EVENT_ERROR,
+          payload: 'Please provide at least one search criteria'
+        });
+        return [];
       }
 
       const events = await getEvents(cleanParams);
@@ -126,7 +138,8 @@ const EventState = (props) => {
         payload: errorMessage
       });
       
-      throw err;
+      // Return empty array instead of throwing
+      return [];
     }
   };
 
@@ -140,11 +153,23 @@ const EventState = (props) => {
         type: GET_EVENT,
         payload: res.data.data
       });
+      
+      return res.data.data;
     } catch (err) {
+      let errorMessage;
+      
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        errorMessage = 'Unable to connect to server. Please check your connection.';
+      } else {
+        errorMessage = err.response?.data?.error || 'Failed to fetch event';
+      }
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to fetch event'
+        payload: errorMessage
       });
+      
+      return null;
     }
   };
 
@@ -161,11 +186,20 @@ const EventState = (props) => {
       
       return res.data.data;
     } catch (err) {
+      let errorMessage;
+      
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        errorMessage = 'Unable to connect to server. Please check your connection.';
+      } else {
+        errorMessage = err.response?.data?.error || 'Failed to add event';
+      }
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to add event'
+        payload: errorMessage
       });
-      throw err;
+      
+      return null;
     }
   };
 
@@ -182,11 +216,20 @@ const EventState = (props) => {
       
       return res.data.data;
     } catch (err) {
+      let errorMessage;
+      
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        errorMessage = 'Unable to connect to server. Please check your connection.';
+      } else {
+        errorMessage = err.response?.data?.error || 'Failed to update event';
+      }
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to update event'
+        payload: errorMessage
       });
-      throw err;
+      
+      return null;
     }
   };
 
@@ -200,11 +243,23 @@ const EventState = (props) => {
         type: DELETE_EVENT,
         payload: id
       });
+      
+      return true;
     } catch (err) {
+      let errorMessage;
+      
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        errorMessage = 'Unable to connect to server. Please check your connection.';
+      } else {
+        errorMessage = err.response?.data?.error || 'Failed to delete event';
+      }
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to delete event'
+        payload: errorMessage
       });
+      
+      return false;
     }
   };
 
@@ -223,9 +278,6 @@ const EventState = (props) => {
   const clearFilter = () => {
     dispatch({ type: CLEAR_FILTER });
   };
-
-  // Set Loading
-  const setLoading = () => dispatch({ type: SET_LOADING });
 
   // Clear Search - Modified to prevent unnecessary fetches
   const clearSearch = () => {

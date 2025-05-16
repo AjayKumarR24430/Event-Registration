@@ -6,6 +6,7 @@ import {
     REGISTRATION_ERROR,
     CLEAR_REGISTRATION,
     GET_ADMIN_REGISTRATIONS,
+    GET_ADMIN_STATS,
     SET_LOADING
 } from '../types';
   
@@ -28,6 +29,12 @@ const registrationReducer = (state, action) => {
           adminRegistrations: action.payload,
           loading: false
         };
+      case GET_ADMIN_STATS:
+        return {
+          ...state,
+          stats: action.payload,
+          loading: false
+        };
       case ADD_REGISTRATION:
         return {
           ...state,
@@ -38,14 +45,26 @@ const registrationReducer = (state, action) => {
         return {
           ...state,
           adminRegistrations: state.adminRegistrations.map(reg =>
-            reg._id === action.payload._id ? action.payload : reg
+            reg._id === action.payload._id ? { ...reg, ...action.payload } : reg
           ),
-          loading: false
+          registrations: state.registrations.map(reg =>
+            reg._id === action.payload._id ? { ...reg, ...action.payload } : reg
+          ),
+          stats: action.payload.stats ? {
+            ...state.stats,
+            registrations: {
+              ...state.stats?.registrations,
+              ...action.payload.stats
+            }
+          } : state.stats,
+          loading: false,
+          error: null
         };
       case CANCEL_REGISTRATION:
         return {
           ...state,
           registrations: state.registrations.filter(reg => reg._id !== action.payload),
+          adminRegistrations: state.adminRegistrations.filter(reg => reg._id !== action.payload),
           loading: false
         };
       case REGISTRATION_ERROR:

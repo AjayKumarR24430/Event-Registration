@@ -16,6 +16,7 @@ import RegisterPage from './pages/RegisterPage';
 import MyRegistrationsPage from './pages/MyRegistrationsPage';
 import AdminRegistrationsPage from './pages/AdminRegistrationsPage';
 import AdminEventsPage from './pages/AdminEventsPage';
+import EventRegistrationsDashboard from './components/admin/EventRegistrationsDashboard';
 
 // Context Providers
 import AuthState from './contexts/auth/AuthState';
@@ -69,7 +70,7 @@ const AppContent = () => {
               path="/admin/registrations" 
               element={
                 <AdminRoute>
-                  <AdminRegistrationsPage />
+                  <EventRegistrationsDashboard />
                 </AdminRoute>
               } 
             />

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import useAuthContext from '../../contexts/auth/authContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useAuthContext();
   const { isRtl, toggleRtl, t } = useRtlContext();
+  const location = useLocation();
   
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
@@ -14,79 +15,112 @@ const Navbar = () => {
   };
 
   const authLinks = (
-    <>
-      <li className="mx-2">
-        <Link to="/my-registrations" className="text-white hover:text-gray-300">
-          {t('myRegistrations')}
-        </Link>
-      </li>
-      {isAdmin && (
+    <ul className="flex items-center space-x-4">
+      {user && user.role === 'admin' ? (
         <>
-          <li className="mx-2">
-            <Link to="/admin/events" className="text-white hover:text-gray-300">
-              {t('admin')} {t('events')}
+          <li>
+            <Link
+              to="/admin/events"
+              className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                location.pathname.startsWith('/admin/events') ? 'bg-gray-900' : ''
+              }`}
+            >
+              {isRtl ? 'إدارة الفعاليات' : 'Event Management'}
             </Link>
           </li>
-          <li className="mx-2">
-            <Link to="/admin/registrations" className="text-white hover:text-gray-300">
-              {t('admin')} {t('myRegistrations')}
+          <li>
+            <Link
+              to="/admin/registrations"
+              className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                location.pathname.startsWith('/admin/registrations') ? 'bg-gray-900' : ''
+              }`}
+            >
+              {isRtl ? 'إدارة التسجيلات' : 'Registration Management'}
+            </Link>
+          </li>
+        </>
+      ) : (
+        <>
+          <li>
+            <Link
+              to="/events"
+              className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                location.pathname === '/events' ? 'bg-gray-900' : ''
+              }`}
+            >
+              {isRtl ? 'الفعاليات' : 'Events'}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/my-registrations"
+              className={`text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
+                location.pathname === '/my-registrations' ? 'bg-gray-900' : ''
+              }`}
+            >
+              {isRtl ? 'تسجيلاتي' : 'My Registrations'}
             </Link>
           </li>
         </>
       )}
-      <li className="mx-2">
-        <a onClick={onLogout} href="#!" className="text-white hover:text-gray-300 cursor-pointer">
-          <span className="hidden md:inline">{t('logout')}</span>
-        </a>
+      <li>
+        <button
+          onClick={onLogout}
+          className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+        >
+          {isRtl ? 'تسجيل خروج' : 'Logout'}
+        </button>
       </li>
-    </>
+      <li>
+        <button 
+          onClick={toggleRtl} 
+          className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200"
+        >
+          {isRtl ? 'English' : 'العربية'}
+        </button>
+      </li>
+    </ul>
   );
 
   const guestLinks = (
-    <>
-      <li className="mx-2">
-        <Link to="/register" className="text-white hover:text-gray-300">
+    <ul className="flex items-center space-x-4">
+      <li>
+        <Link 
+          to="/register" 
+          className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+        >
           {t('register')}
         </Link>
       </li>
-      <li className="mx-2">
-        <Link to="/login" className="text-white hover:text-gray-300">
+      <li>
+        <Link 
+          to="/login" 
+          className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+        >
           {t('login')}
         </Link>
       </li>
-    </>
+      <li>
+        <button 
+          onClick={toggleRtl} 
+          className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200"
+        >
+          {isRtl ? 'English' : 'العربية'}
+        </button>
+      </li>
+    </ul>
   );
 
   return (
-    <nav className="bg-primary-700 py-4">
-      <div className="container mx-auto px-4 flex flex-wrap items-center justify-between">
-        <Link to="/" className="text-white text-xl font-bold">
-          {t('welcomeMessage')}
-        </Link>
-        
-        <ul className="flex items-center">
-          <li className="mx-2">
-            <Link to="/" className="text-white hover:text-gray-300">
-              {t('home')}
-            </Link>
-          </li>
-          <li className="mx-2">
-            <Link to="/events" className="text-white hover:text-gray-300">
-              {t('events')}
-            </Link>
-          </li>
-          {isAuthenticated ? authLinks : guestLinks}
+    <nav className="bg-primary-700">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          <Link to={user?.role === 'admin' ? '/admin/events' : '/'} className="text-white text-xl font-bold">
+            {t('welcomeMessage')}
+          </Link>
           
-          {/* RTL Toggle Button */}
-          <li className="ml-4">
-            <button 
-              onClick={toggleRtl} 
-              className="bg-primary-600 hover:bg-primary-800 text-white font-bold py-1 px-3 rounded-full text-sm transition duration-300"
-            >
-              {isRtl ? 'English' : 'العربية'}
-            </button>
-          </li>
-        </ul>
+          {isAuthenticated ? authLinks : guestLinks}
+        </div>
       </div>
     </nav>
   );
