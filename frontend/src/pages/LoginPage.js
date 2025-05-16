@@ -5,7 +5,7 @@ import useRtlContext from '../contexts/rtl/rtlContext';
 import Login from '../components/auth/Login';
 
 const LoginPage = () => {
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
   const { isRtl } = useRtlContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,11 +14,15 @@ const LoginPage = () => {
   const from = location.state?.from || '/';
 
   useEffect(() => {
-    // If user is already authenticated, redirect to the previous page or home
-    if (isAuthenticated) {
-      navigate(from);
+    // If user is already authenticated, redirect based on role
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin/events');
+      } else {
+        navigate(from);
+      }
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, user, navigate, from]);
 
   return (
     <div className="container mx-auto px-4 py-12">

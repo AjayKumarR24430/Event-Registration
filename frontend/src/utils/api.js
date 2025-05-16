@@ -39,9 +39,10 @@ api.interceptors.response.use(
     }
 
     const { status } = error.response;
+    const isPublicRoute = error.config.url.includes('/events') && !error.config.url.includes('/register');
     
-    // Handle token expiration or invalid token, but not login failures
-    if (status === 401 && !error.config.url.includes('/auth/login')) {
+    // Handle token expiration or invalid token, but not for public routes or login
+    if (status === 401 && !error.config.url.includes('/auth/login') && !isPublicRoute) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

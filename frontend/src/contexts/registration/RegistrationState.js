@@ -12,13 +12,17 @@ import {
   CLEAR_REGISTRATION,
   GET_ADMIN_REGISTRATIONS,
   SET_LOADING,
-  GET_ADMIN_STATS
+  GET_ADMIN_STATS,
+  GET_EVENT_REGISTRATIONS,
+  GET_EVENT_REGISTRATION_STATS
 } from '../types';
 
 const RegistrationState = (props) => {
   const initialState = {
     registrations: [],
     adminRegistrations: [],
+    eventRegistrations: [],
+    eventStats: {},
     stats: null,
     current: null,
     error: null,
@@ -209,6 +213,11 @@ const RegistrationState = (props) => {
         (typeof reg.event === 'object' ? reg.event._id : reg.event) === eventId
       );
       
+      dispatch({
+        type: 'SET_CURRENT_REGISTRATION',
+        payload: registration
+      });
+      
       return registration || null;
     } catch (err) {
       dispatch({
@@ -219,11 +228,55 @@ const RegistrationState = (props) => {
     }
   }, [setLoading]);
 
+  // Get Event Registrations
+  const getEventRegistrations = useCallback(async (eventId) => {
+    setLoading();
+    try {
+      const res = await api.get(`/admin/events/${eventId}/registrations`);
+      
+      dispatch({
+        type: GET_EVENT_REGISTRATIONS,
+        payload: res.data.data
+      });
+      
+      return res.data.data;
+    } catch (err) {
+      dispatch({
+        type: REGISTRATION_ERROR,
+        payload: err.response?.data?.error || 'Failed to fetch event registrations'
+      });
+      return [];
+    }
+  }, [setLoading]);
+
+  // Get Event Registration Stats
+  const getEventRegistrationStats = useCallback(async () => {
+    setLoading();
+    try {
+      const res = await api.get('/admin/events/registration-stats');
+      
+      dispatch({
+        type: GET_EVENT_REGISTRATION_STATS,
+        payload: res.data.data
+      });
+      
+      return res.data.data;
+    } catch (err) {
+      dispatch({
+        type: REGISTRATION_ERROR,
+        payload: err.response?.data?.error || 'Failed to fetch event registration stats'
+      });
+      return {};
+    }
+  }, [setLoading]);
+
   return (
     <registrationContext.Provider
       value={{
         myRegistrations: state.registrations,
         adminRegistrations: state.adminRegistrations,
+        eventRegistrations: state.eventRegistrations,
+        eventStats: state.eventStats,
         stats: state.stats,
         current: state.current,
         error: state.error,
@@ -231,6 +284,8 @@ const RegistrationState = (props) => {
         getUserRegistrations,
         getAdminRegistrations,
         getAdminStats,
+        getEventRegistrations,
+        getEventRegistrationStats,
         getUserRegistrationForEvent,
         registerForEvent,
         cancelRegistration,

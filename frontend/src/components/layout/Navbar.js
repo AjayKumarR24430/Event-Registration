@@ -16,7 +16,7 @@ const Navbar = () => {
 
   const authLinks = (
     <ul className="flex items-center space-x-4">
-      {user && user.role === 'admin' ? (
+      {isAdmin ? (
         <>
           <li>
             <Link

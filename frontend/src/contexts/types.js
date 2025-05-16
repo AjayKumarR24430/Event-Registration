@@ -32,3 +32,7 @@ export const GET_ADMIN_STATS = 'GET_ADMIN_STATS';
 
 // RTL Types
 export const TOGGLE_RTL = 'TOGGLE_RTL';
+
+// New type for event registrations
+export const GET_EVENT_REGISTRATIONS = 'GET_EVENT_REGISTRATIONS';
+export const GET_EVENT_REGISTRATION_STATS = 'GET_EVENT_REGISTRATION_STATS';

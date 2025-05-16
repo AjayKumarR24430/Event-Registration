@@ -2,7 +2,9 @@ const express = require('express');
 const { 
   getPendingRegistrations, 
   updateRegistrationStatus,
-  getStats
+  getStats,
+  getEventRegistrations,
+  getEventRegistrationStats
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middlewares/auth');
 
@@ -15,5 +17,7 @@ router.use(authorize('admin'));
 router.get('/registrations', getPendingRegistrations);
 router.put('/registrations/:id/:action', updateRegistrationStatus);
 router.get('/stats', getStats);
+router.get('/events/:eventId/registrations', getEventRegistrations);
+router.get('/events/registration-stats', getEventRegistrationStats);
 
 module.exports = router;

@@ -3,52 +3,63 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useEventContext from '../contexts/event/eventContext';
 import useAuthContext from '../contexts/auth/authContext';
 import useRegistrationContext from '../contexts/registration/registrationContext';
-import EventDetail from '../components/events/EventDetail';
-import EventForm from '../components/events/EventForm';
-import { formatDate } from '../utils/dateFormatter';
+import Spinner from '../components/layout/Spinner';
+import { Link } from 'react-router-dom';
 
 const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getEvent, currentEvent, loading, updateEvent, deleteEvent } = useEventContext();
-  const { user } = useAuthContext();
-  const { registerForEvent, getUserRegistrationForEvent, registration } = useRegistrationContext();
-  const [isEditing, setIsEditing] = useState(false);
+  const { getEvent, currentEvent, loading: eventLoading, error: eventError } = useEventContext();
+  const { user, isAuthenticated } = useAuthContext();
+  const { registerForEvent, getUserRegistrationForEvent, current: registration, loading: registrationLoading } = useRegistrationContext();
   const [registrationStatus, setRegistrationStatus] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
+  // Load event data
   useEffect(() => {
-    getEvent(id);
-    
-    if (user) {
-      getUserRegistrationForEvent(id);
-    }
-  }, [id, user]);
+    const loadEventData = async () => {
+      try {
+        const event = await getEvent(id);
+        if (!event) {
+          setLoadError('Event not found');
+          return;
+        }
+      } catch (err) {
+        console.error('Error loading event:', err);
+        setLoadError(err.response?.data?.error || 'Failed to load event');
+      }
+    };
+    loadEventData();
+  }, [id, getEvent]);
 
+  // Load registration status
   useEffect(() => {
-    if (registration) {
-      setRegistrationStatus(registration.status);
-    } else {
-      setRegistrationStatus(null);
-    }
+    const loadRegistrationStatus = async () => {
+      if (isAuthenticated && user) {
+        await getUserRegistrationForEvent(id);
+      }
+    };
+    loadRegistrationStatus();
+  }, [id, isAuthenticated, user, getUserRegistrationForEvent]);
+
+  // Update registration status when registration changes
+  useEffect(() => {
+    setRegistrationStatus(registration?.status || null);
   }, [registration]);
 
   const handleRegister = async () => {
-    if (!user) {
+    if (!isAuthenticated) {
       navigate('/login', { state: { from: `/events/${id}` } });
       return;
     }
     
     try {
       const result = await registerForEvent(id);
-      
-      // If we got an error response with status
       if (result && result.success === false) {
-        // Update registration status if the error is due to existing registration
         if (result.status) {
           setRegistrationStatus(result.status);
         }
       } else {
-        // Successful new registration
         setRegistrationStatus('pending');
       }
     } catch (err) {
@@ -56,129 +67,171 @@ const EventDetailPage = () => {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  if (!isAuthenticated && eventLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      await deleteEvent(id);
-      navigate('/events');
-    }
-  };
+  if (isAuthenticated && (eventLoading || registrationLoading)) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
-  const handleEditComplete = () => {
-    setIsEditing(false);
-  };
-
-  if (loading) {
+  if (loadError || eventError) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <div className="loader">Loading...</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{loadError || eventError}</span>
         </div>
+        <Link to="/events" className="mt-4 inline-block text-primary-600 hover:text-primary-700">
+          ← Back to Events
+        </Link>
       </div>
     );
   }
 
   if (!currentEvent) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">Event not found</h2>
-          <button 
-            onClick={() => navigate('/events')}
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-          >
-            Back to Events
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
+
+  const getRegistrationStatusUI = () => {
+    if (!isAuthenticated) {
+      return {
+        containerClass: 'bg-gray-50 border border-gray-200',
+        icon: '👋',
+        title: 'Want to Join?',
+        message: 'Login to register for this event',
+        actionButton: (
+          <button
+            onClick={() => navigate('/login', { state: { from: `/events/${id}` } })}
+            className="mt-4 w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition duration-200 text-lg font-medium"
+          >
+            Login to Register
+          </button>
+        )
+      };
+    }
+
+    if (registrationStatus === 'approved') {
+      return {
+        containerClass: 'bg-green-50 border border-green-200',
+        icon: '✓',
+        title: 'You\'re Going!',
+        message: 'Your registration has been approved. We look forward to seeing you at the event!',
+        subMessage: `Event Date: ${new Date(currentEvent.date).toLocaleDateString()}`
+      };
+    }
+
+    if (registrationStatus === 'pending') {
+      return {
+        containerClass: 'bg-yellow-50 border border-yellow-200',
+        icon: '⏳',
+        title: 'Registration Pending',
+        message: 'Your registration is currently under review.',
+        subMessage: 'We\'ll notify you once it\'s approved.'
+      };
+    }
+
+    if (registrationStatus === 'rejected') {
+      return {
+        containerClass: 'bg-red-50 border border-red-200',
+        icon: '✕',
+        title: 'Registration Not Approved',
+        message: 'Unfortunately, your registration was not approved.',
+        subMessage: 'Please contact support for more information.'
+      };
+    }
+
+    if (currentEvent.availableSpots <= 0) {
+      return {
+        containerClass: 'bg-red-50 border border-red-200',
+        icon: '🚫',
+        title: 'Event Full',
+        message: 'Sorry, this event is fully booked.',
+        subMessage: 'Please check back later or explore other events.'
+      };
+    }
+
+    return {
+      containerClass: 'bg-blue-50 border border-blue-200',
+      icon: '🎟️',
+      title: 'Spots Available',
+      message: `${currentEvent.availableSpots} spots remaining`,
+      actionButton: (
+        <button
+          onClick={handleRegister}
+          className="mt-4 w-full bg-primary-600 text-white py-3 px-4 rounded-lg hover:bg-primary-700 transition duration-200 text-lg font-medium"
+        >
+          Register for Event
+        </button>
+      )
+    };
+  };
+
+  const statusUI = getRegistrationStatusUI();
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {isEditing ? (
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Edit Event</h2>
-          <EventForm 
-            event={currentEvent} 
-            isEditing={true} 
-            onComplete={handleEditComplete} 
-          />
-        </div>
-      ) : (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">{currentEvent.title}</h1>
-            {user && user.role === 'admin' && (
-              <div className="space-x-4">
-                <button 
-                  onClick={handleEdit}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-                >
-                  Edit
-                </button>
-                <button 
-                  onClick={handleDelete}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <h1 className="text-3xl font-bold mb-6">{currentEvent.title}</h1>
+          
+          {/* Registration Status Section - Prominent at the top */}
+          <div className={`mb-8 p-6 rounded-lg ${statusUI.containerClass}`}>
+            <div className="text-center">
+              <div className="text-4xl mb-3">{statusUI.icon}</div>
+              <h2 className="text-2xl font-bold mb-2">{statusUI.title}</h2>
+              <p className="text-lg mb-2">{statusUI.message}</p>
+              {statusUI.subMessage && (
+                <p className="text-sm opacity-75">{statusUI.subMessage}</p>
+              )}
+              {statusUI.actionButton}
+            </div>
           </div>
 
-          <EventDetail event={currentEvent} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="md:col-span-2">
+              <h2 className="text-xl font-semibold mb-4">About This Event</h2>
+              <p className="text-gray-700 whitespace-pre-line mb-6">{currentEvent.description}</p>
+            </div>
 
-          <div className="mt-8">
-            {registrationStatus ? (
-              <div className="border rounded-lg p-6 bg-gray-50">
-                <h3 className="text-xl font-semibold mb-4">Your Registration</h3>
-                <div className="flex items-center">
-                  <span className="mr-2">Status:</span>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    registrationStatus === 'approved' ? 'bg-green-100 text-green-800' : 
-                    registrationStatus === 'rejected' ? 'bg-red-100 text-red-800' : 
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1)}
-                  </span>
-                </div>
-                {registrationStatus === 'pending' && (
-                  <p className="mt-2 text-gray-600">Your registration is pending approval from the admin.</p>
-                )}
-                {registrationStatus === 'approved' && (
-                  <p className="mt-2 text-gray-600">Your registration has been approved. We look forward to seeing you at the event!</p>
-                )}
-                {registrationStatus === 'rejected' && (
-                  <p className="mt-2 text-gray-600">Your registration has been rejected. Please contact the administrator for more information.</p>
-                )}
-              </div>
-            ) : (
-              <div>
-                {currentEvent.availableSpots > 0 ? (
-                  <button 
-                    onClick={handleRegister}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200"
-                    disabled={!user}
-                  >
-                    Register for this Event
-                  </button>
-                ) : (
-                  <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
-                    This event is fully booked.
+            {/* Sidebar */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">Event Details</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-gray-600">Date</p>
+                    <p className="font-medium">{new Date(currentEvent.date).toLocaleDateString()}</p>
                   </div>
-                )}
-                {!user && (
-                  <p className="mt-2 text-gray-600">Please <a href="/login" className="text-blue-600 hover:underline">login</a> to register for this event.</p>
-                )}
+                  <div>
+                    <p className="text-gray-600">Location</p>
+                    <p className="font-medium">{currentEvent.location}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Category</p>
+                    <p className="font-medium">{currentEvent.category}</p>
+                  </div>
+                  {currentEvent.price && (
+                    <div>
+                      <p className="text-gray-600">Price</p>
+                      <p className="font-medium">${currentEvent.price}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

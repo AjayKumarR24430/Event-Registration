@@ -17,31 +17,51 @@ import {
 } from '../types';
 
 const AuthState = (props) => {
-    const initialState = {
-      token: localStorage.getItem('token'),
-      isAuthenticated: localStorage.getItem('token') ? true : false, // Set initial value based on token
-      loading: localStorage.getItem('token') ? true : false, // Only set loading if we need to fetch user
-      user: null,
-      error: null
-    };
+  // Get cached user data
+  let cachedUser = null;
+  try {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      cachedUser = JSON.parse(userStr);
+    }
+  } catch (e) {
+    localStorage.removeItem('user');
+  }
+
+  const initialState = {
+    token: localStorage.getItem('token'),
+    isAuthenticated: !!localStorage.getItem('token'),
+    loading: false,
+    user: cachedUser,
+    error: null
+  };
 
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Load User
   const loadUser = async () => {
-    if (localStorage.token) {
-      setAuthToken(localStorage.token);
+    if (!localStorage.token) {
+      dispatch({ type: AUTH_ERROR });
+      return null;
     }
 
     try {
+      setAuthToken(localStorage.token);
       const res = await api.get('/auth/me');
+      
+      // Update cached user data
+      localStorage.setItem('user', JSON.stringify(res.data));
 
       dispatch({
         type: USER_LOADED,
         payload: res.data
       });
+      return res.data;
     } catch (err) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       dispatch({ type: AUTH_ERROR });
+      return null;
     }
   };
 
@@ -49,7 +69,12 @@ const AuthState = (props) => {
   const register = async (formData) => {
     try {
       const res = await api.post('/auth/signup', formData);
+      
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      
+      setAuthToken(res.data.token);
+
       dispatch({
         type: REGISTER_SUCCESS,
         payload: res.data
@@ -72,28 +97,37 @@ const AuthState = (props) => {
     try {
       const res = await api.post('/auth/login', formData);
 
+      setAuthToken(res.data.token);
+      
+      // Store both token and user data in localStorage
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+
       dispatch({
         type: LOGIN_SUCCESS,
         payload: res.data
       });
 
-      dispatch({
-        type: USER_LOADED,
-        payload: res.data.user
-      });
-
-      return true; // Return true on success
+      return true;
     } catch (err) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setAuthToken(null);
       dispatch({
         type: LOGIN_FAIL,
         payload: err.response?.data?.error || 'Invalid credentials'
       });
-      return false; // Return false on failure
+      return false;
     }
   };
 
   // Logout
-  const logout = () => dispatch({ type: LOGOUT });
+  const logout = () => {
+    setAuthToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    dispatch({ type: LOGOUT });
+  };
 
   // Clear Errors
   const clearErrors = () => dispatch({ type: CLEAR_ERRORS });

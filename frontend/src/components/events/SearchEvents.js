@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useEventContext from '../../contexts/event/eventContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 import { toast } from 'react-toastify';
@@ -10,15 +10,15 @@ const SearchEvents = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
-  const [searchPerformed, setSearchPerformed] = useState(false);
+  const [localError, setLocalError] = useState(null);
   
   const handleSearch = async (e) => {
     e.preventDefault();
-    setSearchPerformed(true);
+    setLocalError(null);
     
     // Validate that at least one field has a value
     if (searchTitle.trim() === '' && searchDate === '' && searchCategory === '') {
-      toast.error(isRtl 
+      setLocalError(isRtl 
         ? 'يرجى تحديد معيار بحث واحد على الأقل'
         : 'Please provide at least one search criteria');
       return;
@@ -31,10 +31,15 @@ const SearchEvents = () => {
         ...(searchCategory && { category: searchCategory })
       };
       
-      await searchEvents(searchParams);
+      const results = await searchEvents(searchParams);
+      if (results.length === 0) {
+        setLocalError(isRtl 
+          ? 'لم يتم العثور على أي فعاليات تطابق معايير البحث'
+          : 'No events found matching your search criteria');
+      }
     } catch (err) {
       console.error('Search error:', err);
-      toast.error(err.message || (isRtl 
+      setLocalError(err.message || (isRtl 
         ? 'حدث خطأ أثناء البحث'
         : 'An error occurred while searching'));
     }
@@ -44,11 +49,8 @@ const SearchEvents = () => {
     setSearchTitle('');
     setSearchDate('');
     setSearchCategory('');
-    setSearchPerformed(false);
+    setLocalError(null);
     await clearSearch();
-    toast.info(isRtl 
-      ? 'تم مسح معايير البحث'
-      : 'Search criteria cleared');
   };
 
   const handleKeyPress = async (e) => {
@@ -70,7 +72,10 @@ const SearchEvents = () => {
               type="text"
               id="searchTitle"
               value={searchTitle}
-              onChange={e => setSearchTitle(e.target.value)}
+              onChange={e => {
+                setSearchTitle(e.target.value);
+                setLocalError(null);
+              }}
               onKeyPress={handleKeyPress}
               placeholder={isRtl ? 'ابحث بالعنوان' : 'Search by title'}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -85,7 +90,10 @@ const SearchEvents = () => {
               type="date"
               id="searchDate"
               value={searchDate}
-              onChange={e => setSearchDate(e.target.value)}
+              onChange={e => {
+                setSearchDate(e.target.value);
+                setLocalError(null);
+              }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
@@ -97,7 +105,10 @@ const SearchEvents = () => {
             <select
               id="searchCategory"
               value={searchCategory}
-              onChange={e => setSearchCategory(e.target.value)}
+              onChange={e => {
+                setSearchCategory(e.target.value);
+                setLocalError(null);
+              }}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">{isRtl ? 'جميع التصنيفات' : 'All Categories'}</option>
@@ -110,13 +121,13 @@ const SearchEvents = () => {
           </div>
         </div>
         
-        {error && searchPerformed && (
+        {localError && (
           <div className="text-red-600 text-sm mt-2 bg-red-50 p-2 rounded">
-            {error}
+            {localError}
           </div>
         )}
         
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={handleClear}

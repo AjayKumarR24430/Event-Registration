@@ -4,19 +4,23 @@ import useAuthContext from '../../contexts/auth/authContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
 
 const Login = () => {
-  const { login, error, clearErrors, isAuthenticated } = useAuthContext();
+  const { login, error, clearErrors, isAuthenticated, user } = useAuthContext();
   const { t } = useRtlContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only redirect if authentication is successful
-    if (isAuthenticated) {
-      navigate('/');
+    // Redirect based on user role after successful authentication
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin/events');
+      } else {
+        navigate('/');
+      }
     }
     // eslint-disable-next-line
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const [formData, setFormData] = useState({
     email: '',

@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 
 // Layout Components
 import Navbar from './components/layout/Navbar';
@@ -17,6 +17,7 @@ import MyRegistrationsPage from './pages/MyRegistrationsPage';
 import AdminRegistrationsPage from './pages/AdminRegistrationsPage';
 import AdminEventsPage from './pages/AdminEventsPage';
 import EventRegistrationsDashboard from './components/admin/EventRegistrationsDashboard';
+import AdminEventDetails from './components/admin/AdminEventDetails';
 
 // Context Providers
 import AuthState from './contexts/auth/AuthState';
@@ -33,60 +34,81 @@ if (localStorage.token) {
   setAuthToken(localStorage.token);
 }
 
-const AppContent = () => {
-  const { loadUser, user, loading } = useAuthContext();
+const AppRoutes = () => {
+  const { loadUser, user, loading, isAuthenticated } = useAuthContext();
   const { isRtl } = useRtlContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Only load user if we haven't already and there's a token
-    if (localStorage.token) {
-      loadUser();
-    }
-  }, []);
+    const initializeAuth = async () => {
+      if (localStorage.token && !user) {
+        await loadUser();
+      }
+    };
+    initializeAuth();
+  }, [loadUser, user]);
 
+  // Handle authentication state changes
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      // Clear any sensitive data from state
+      localStorage.removeItem('token');
+      // Only redirect from protected routes
+      const path = window.location.pathname;
+      if (path.includes('/admin') || path.includes('/my-registrations')) {
+        navigate('/');
+      }
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   const appClass = isRtl ? 'rtl' : 'ltr';
 
   return (
-    <Router>
-      <div className={`min-h-screen flex flex-col ${appClass}`}>
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:id" element={<EventDetailPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route 
-              path="/my-registrations" 
-              element={
-                <PrivateRoute>
-                  <MyRegistrationsPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/admin/registrations" 
-              element={
-                <AdminRoute>
-                  <EventRegistrationsDashboard />
-                </AdminRoute>
-              } 
-            />
-            <Route 
-              path="/admin/events" 
-              element={
-                <AdminRoute>
-                  <AdminEventsPage />
-                </AdminRoute>
-              } 
-            />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <div className={`min-h-screen flex flex-col ${appClass}`}>
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route 
+            path="/my-registrations" 
+            element={
+              <PrivateRoute>
+                <MyRegistrationsPage />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/admin/registrations" 
+            element={
+              <AdminRoute>
+                <EventRegistrationsDashboard />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/events" 
+            element={
+              <AdminRoute>
+                <AdminEventsPage />
+              </AdminRoute>
+            } 
+          />
+          <Route 
+            path="/admin/events/:eventId" 
+            element={
+              <AdminRoute>
+                <AdminEventDetails />
+              </AdminRoute>
+            } 
+          />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
@@ -96,7 +118,9 @@ const App = () => {
       <EventState>
         <RegistrationState>
           <RtlState>
-            <AppContent />
+            <Router>
+              <AppRoutes />
+            </Router>
           </RtlState>
         </RegistrationState>
       </EventState>

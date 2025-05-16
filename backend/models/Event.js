@@ -61,4 +61,11 @@ EventSchema.pre('save', function(next) {
   next();
 });
 
+// Delete all registrations when an event is deleted
+EventSchema.pre('deleteOne', { document: true }, async function(next) {
+  const Registration = mongoose.model('Registration');
+  await Registration.deleteMany({ event: this._id });
+  next();
+});
+
 module.exports = mongoose.model('Event', EventSchema);

@@ -145,3 +145,85 @@ exports.getStats = async (req, res, next) => {
     next(err);
   }
 };
+
+// Get all registrations for a specific event
+// @route   GET /api/admin/events/:eventId/registrations
+// @access  Private/Admin
+exports.getEventRegistrations = async (req, res, next) => {
+  try {
+    const { eventId } = req.params;
+    
+    const registrations = await Registration.find({ event: eventId })
+      .populate([
+        { 
+          path: 'user', 
+          select: 'username email' 
+        },
+        { 
+          path: 'event',
+          select: 'title date capacity availableSpots'
+        }
+      ])
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: registrations.length,
+      data: registrations
+    });
+  } catch (err) {
+    logger.error(`Get event registrations error: ${err.message}`);
+    next(err);
+  }
+};
+
+// Get all registrations stats grouped by event
+// @route   GET /api/admin/events/registration-stats
+// @access  Private/Admin
+exports.getEventRegistrationStats = async (req, res, next) => {
+  try {
+    const events = await Event.find().select('_id title');
+    const stats = {};
+    
+    // Get all registrations counts in one query using aggregation
+    const registrationStats = await Registration.aggregate([
+      {
+        $group: {
+          _id: {
+            event: '$event',
+            status: '$status'
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    // Initialize stats for each event
+    events.forEach(event => {
+      stats[event._id] = {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0
+      };
+    });
+    
+    // Fill in the stats from aggregation results
+    registrationStats.forEach(stat => {
+      const eventId = stat._id.event.toString();
+      const status = stat._id.status;
+      if (stats[eventId]) {
+        stats[eventId][status] = stat.count;
+        stats[eventId].total += stat.count;
+      }
+    });
+    
+    res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (err) {
+    logger.error(`Get event registration stats error: ${err.message}`);
+    next(err);
+  }
+};

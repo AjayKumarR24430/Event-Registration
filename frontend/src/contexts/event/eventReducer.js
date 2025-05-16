@@ -22,6 +22,7 @@ const eventReducer = (state, action) => {
         return {
           ...state,
           events: action.payload,
+          error: action.payload.length > 0 ? null : state.error,
           loading: false
         };
       case GET_EVENT:
@@ -60,7 +61,8 @@ const eventReducer = (state, action) => {
         return {
           ...state,
           currentEvent: null,
-          error: null
+          error: null,
+          loading: false
         };
       case FILTER_EVENTS:
         return {

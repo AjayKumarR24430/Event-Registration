@@ -10,15 +10,21 @@ const EventRegistrationsDashboard = () => {
   const { events, getEvents, loading: eventsLoading } = useEventContext();
   const { 
     adminRegistrations, 
-    getAdminRegistrations, 
+    getAdminRegistrations,
+    getEventRegistrations,
+    getEventRegistrationStats,
+    getAdminStats,
+    eventRegistrations,
+    eventStats,
+    stats: adminStats,
     approveRegistration,
     rejectRegistration,
     loading: registrationsLoading,
     error 
   } = useRegistrationContext();
   const { isRtl } = useRtlContext();
+  
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [eventStats, setEventStats] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -26,49 +32,34 @@ const EventRegistrationsDashboard = () => {
       setIsRefreshing(true);
       await Promise.all([
         getEvents(),
-        getAdminRegistrations()
+        getAdminRegistrations(),
+        getAdminStats(),
+        getEventRegistrationStats()
       ]);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setIsRefreshing(false);
     }
-  }, [getEvents, getAdminRegistrations]);
+  }, [getEvents, getAdminRegistrations, getAdminStats, getEventRegistrationStats]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   useEffect(() => {
-    if (events && adminRegistrations) {
-      const stats = {};
-      events.forEach(event => {
-        const eventRegistrations = adminRegistrations.filter(reg => {
-          const regEventId = typeof reg.event === 'object' ? reg.event._id : reg.event;
-          return regEventId === event._id;
-        });
-        
-        const total = eventRegistrations.length;
-        const pending = eventRegistrations.filter(reg => reg.status === 'pending').length;
-        const approved = eventRegistrations.filter(reg => reg.status === 'approved').length;
-        const rejected = eventRegistrations.filter(reg => reg.status === 'rejected').length;
-        
-        stats[event._id] = {
-          total,
-          pending,
-          approved,
-          rejected,
-          registrations: eventRegistrations
-        };
-      });
-      setEventStats(stats);
+    if (selectedEvent) {
+      getEventRegistrations(selectedEvent._id);
     }
-  }, [events, adminRegistrations]);
+  }, [selectedEvent, getEventRegistrations]);
 
   const handleApprove = async (registrationId) => {
     try {
       await approveRegistration(registrationId);
       await loadData();
+      if (selectedEvent) {
+        await getEventRegistrations(selectedEvent._id);
+      }
     } catch (error) {
       console.error('Error approving registration:', error);
     }
@@ -80,24 +71,19 @@ const EventRegistrationsDashboard = () => {
       if (reason !== null) {
         await rejectRegistration(registrationId, reason);
         await loadData();
+        if (selectedEvent) {
+          await getEventRegistrations(selectedEvent._id);
+        }
       }
     } catch (error) {
       console.error('Error rejecting registration:', error);
     }
   };
 
-  const getFilteredRegistrations = () => {
-    if (!selectedEvent) return [];
-    return eventStats[selectedEvent._id]?.registrations || [];
-  };
-
   if (eventsLoading || registrationsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Spinner />
-          <p className="mt-4 text-gray-600">Loading registration data...</p>
-        </div>
+      <div className="flex justify-center items-center min-h-[400px]">
+        <Spinner />
       </div>
     );
   }
@@ -116,15 +102,53 @@ const EventRegistrationsDashboard = () => {
           {isRefreshing ? (
             <>
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-              Refreshing...
+              {isRtl ? 'جارٍ التحديث...' : 'Refreshing...'}
             </>
           ) : (
-            'Refresh Data'
+            <>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {isRtl ? 'تحديث' : 'Refresh'}
+            </>
           )}
         </button>
       </div>
 
       {error && <Alert type="error" message={error} className="mb-6" />}
+
+      {/* Overall Stats Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 className="text-xl font-semibold mb-4">
+          {isRtl ? 'إحصائيات عامة' : 'Overall Statistics'}
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-blue-100 rounded-lg">
+            <p className="text-sm text-blue-800">Total Registrations</p>
+            <p className="text-2xl font-bold text-blue-900">
+              {adminStats?.registrations?.total || 0}
+            </p>
+          </div>
+          <div className="text-center p-4 bg-yellow-100 rounded-lg">
+            <p className="text-sm text-yellow-800">Pending</p>
+            <p className="text-2xl font-bold text-yellow-900">
+              {adminStats?.registrations?.pending || 0}
+            </p>
+          </div>
+          <div className="text-center p-4 bg-green-100 rounded-lg">
+            <p className="text-sm text-green-800">Approved</p>
+            <p className="text-2xl font-bold text-green-900">
+              {adminStats?.registrations?.approved || 0}
+            </p>
+          </div>
+          <div className="text-center p-4 bg-red-100 rounded-lg">
+            <p className="text-sm text-red-800">Rejected</p>
+            <p className="text-2xl font-bold text-red-900">
+              {adminStats?.registrations?.rejected || 0}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {events.map(event => (
@@ -174,13 +198,13 @@ const EventRegistrationsDashboard = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold">
-              {selectedEvent.title} - Registrations
+              {selectedEvent.title} - {isRtl ? 'التسجيلات' : 'Registrations'}
             </h3>
             <Link 
               to={`/events/${selectedEvent._id}`}
               className="text-primary-600 hover:text-primary-700"
             >
-              View Event Details
+              {isRtl ? 'عرض تفاصيل الفعالية' : 'View Event Details'}
             </Link>
           </div>
 
@@ -189,24 +213,29 @@ const EventRegistrationsDashboard = () => {
               <thead>
                 <tr className="bg-gray-50">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
+                    {isRtl ? 'المستخدم' : 'User'}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {isRtl ? 'الحالة' : 'Status'}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Registration Date
+                    {isRtl ? 'تاريخ التسجيل' : 'Registration Date'}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {isRtl ? 'الإجراءات' : 'Actions'}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {getFilteredRegistrations().map(registration => (
+                {eventRegistrations.map(registration => (
                   <tr key={registration._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {registration.user?.username || registration.user?.email || 'Unknown User'}
+                      <div className="text-sm font-medium text-gray-900">
+                        {registration.user?.username || registration.user?.email || 'Unknown User'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {registration.user?.email}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -221,21 +250,26 @@ const EventRegistrationsDashboard = () => {
                       {new Date(registration.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {registration.status === 'pending' && (
+                      {registration.status === 'pending' ? (
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleApprove(registration._id)}
                             className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition duration-200"
                           >
-                            Approve
+                            {isRtl ? 'موافقة' : 'Approve'}
                           </button>
                           <button
                             onClick={() => handleReject(registration._id)}
                             className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition duration-200"
                           >
-                            Reject
+                            {isRtl ? 'رفض' : 'Reject'}
                           </button>
                         </div>
+                      ) : (
+                        <span className="text-gray-500 italic">
+                          {registration.status === 'approved' ? 'Approved' : 'Rejected'} 
+                          {registration.reason ? ` - ${registration.reason}` : ''}
+                        </span>
                       )}
                     </td>
                   </tr>

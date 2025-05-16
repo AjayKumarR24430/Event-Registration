@@ -22,7 +22,7 @@ const EventState = (props) => {
     currentEvent: null,
     filtered: null,
     error: null,
-    loading: true
+    loading: false
   };
 
   const [state, dispatch] = useReducer(eventReducer, initialState);
@@ -91,6 +91,8 @@ const EventState = (props) => {
   // Search Events
   const searchEvents = async (searchParams) => {
     setLoading();
+    dispatch({ type: CLEAR_EVENT }); // Clear any existing error state
+    
     try {
       // Clean up search parameters
       const cleanParams = {};
@@ -120,6 +122,13 @@ const EventState = (props) => {
 
       const events = await getEvents(cleanParams);
       
+      // Dispatch events first
+      dispatch({
+        type: GET_EVENTS,
+        payload: events
+      });
+      
+      // Then set error if no events found
       if (events.length === 0) {
         dispatch({
           type: EVENT_ERROR,
@@ -144,10 +153,18 @@ const EventState = (props) => {
   };
 
   // Get Event
-  const getEvent = async (id) => {
+  const getEvent = useCallback(async (id) => {
     setLoading();
     try {
       const res = await api.get(`/events/${id}`);
+
+      if (!res.data.data) {
+        dispatch({
+          type: EVENT_ERROR,
+          payload: 'Event not found'
+        });
+        return null;
+      }
 
       dispatch({
         type: GET_EVENT,
@@ -171,7 +188,7 @@ const EventState = (props) => {
       
       return null;
     }
-  };
+  }, [setLoading]);
 
   // Add Event
   const addEvent = async (event) => {
@@ -281,7 +298,6 @@ const EventState = (props) => {
 
   // Clear Search - Modified to prevent unnecessary fetches
   const clearSearch = () => {
-    console.log('Clear search called from:', new Error().stack);
     dispatch({ type: CLEAR_EVENT });
     return getEvents(); // Only fetch all events when explicitly clearing
   };
