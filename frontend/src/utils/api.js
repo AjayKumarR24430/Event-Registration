@@ -27,10 +27,21 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Handle case where response doesn't exist (network error, server down, etc.)
+    if (!error.response) {
+      return Promise.reject({
+        response: {
+          data: {
+            error: 'Network error - please check your connection or try again later'
+          }
+        }
+      });
+    }
+
     const { status } = error.response;
     
-    // Handle token expiration or invalid token
-    if (status === 401) {
+    // Handle token expiration or invalid token, but not login failures
+    if (status === 401 && !error.config.url.includes('/auth/login')) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

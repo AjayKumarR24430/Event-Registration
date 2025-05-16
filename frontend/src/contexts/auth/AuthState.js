@@ -72,7 +72,6 @@ const AuthState = (props) => {
     try {
       const res = await api.post('/auth/login', formData);
 
-      localStorage.setItem('token', res.data.token);
       dispatch({
         type: LOGIN_SUCCESS,
         payload: res.data
@@ -82,11 +81,14 @@ const AuthState = (props) => {
         type: USER_LOADED,
         payload: res.data.user
       });
+
+      return true; // Return true on success
     } catch (err) {
       dispatch({
         type: LOGIN_FAIL,
         payload: err.response?.data?.error || 'Invalid credentials'
       });
+      return false; // Return false on failure
     }
   };
 

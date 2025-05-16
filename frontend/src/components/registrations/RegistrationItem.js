@@ -46,9 +46,9 @@ const RegistrationItem = ({ registration, isAdmin }) => {
   };
   
   // Extract event data regardless of whether it's populated or not
-  const event = registration.event;
-  const eventId = event._id || event;
-  const eventTitle = event.title || 'Loading...';
+  const event = registration.event || {};
+  const eventId = typeof event === 'object' ? event._id : event || 'unknown';
+  const eventTitle = event.title || 'Event Unavailable';
   const eventDate = event.date ? formatDate(event.date) : 'N/A';
   
   // Extract user data for admin view

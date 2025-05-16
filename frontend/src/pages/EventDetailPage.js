@@ -38,8 +38,22 @@ const EventDetailPage = () => {
       return;
     }
     
-    await registerForEvent(id);
-    setRegistrationStatus('pending');
+    try {
+      const result = await registerForEvent(id);
+      
+      // If we got an error response with status
+      if (result && result.success === false) {
+        // Update registration status if the error is due to existing registration
+        if (result.status) {
+          setRegistrationStatus(result.status);
+        }
+      } else {
+        // Successful new registration
+        setRegistrationStatus('pending');
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+    }
   };
 
   const handleEdit = () => {

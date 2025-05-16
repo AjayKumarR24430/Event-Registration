@@ -74,6 +74,16 @@ const RegistrationState = (props) => {
       
       return res.data.data;
     } catch (err) {
+      // Check if this is a duplicate registration error
+      if (err.response?.status === 400 && err.response?.data?.error) {
+        dispatch({
+          type: REGISTRATION_ERROR,
+          payload: err.response.data.error
+        });
+        // Return the error data so we can check the registration status
+        return err.response.data;
+      }
+      
       dispatch({
         type: REGISTRATION_ERROR,
         payload: err.response?.data?.error || 'Failed to register for event'
@@ -154,9 +164,13 @@ const RegistrationState = (props) => {
   const getUserRegistrationForEvent = async (eventId) => {
     setLoading();
     try {
-      const res = await api.get(`/events/${eventId}/registration`);
+      // Get all user registrations and filter for this event
+      const res = await api.get('/registrations');
+      const registration = res.data.data.find(reg => 
+        (typeof reg.event === 'object' ? reg.event._id : reg.event) === eventId
+      );
       
-      return res.data.data;
+      return registration || null;
     } catch (err) {
       dispatch({
         type: REGISTRATION_ERROR,

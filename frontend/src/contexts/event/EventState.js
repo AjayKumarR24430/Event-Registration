@@ -50,9 +50,7 @@ const EventState = (props) => {
       const queryString = queryParams.toString();
       const url = `/events${queryString ? `?${queryString}` : ''}`;
       
-      // Add stack trace to debug where the call is coming from
       console.log('Fetching events with URL:', url);
-      console.log('Call stack:', new Error().stack);
       
       const res = await api.get(url);
       
@@ -64,10 +62,20 @@ const EventState = (props) => {
       return res.data.data;
     } catch (err) {
       console.error('Error fetching events:', err);
+      const errorMessage = err.response?.data?.error || 
+        'Unable to fetch events. Please check your connection or try again later.';
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.response?.data?.error || 'Failed to fetch events'
+        payload: errorMessage
       });
+      
+      // Clear events on error to prevent showing stale data
+      dispatch({
+        type: GET_EVENTS,
+        payload: []
+      });
+      
       throw err;
     }
   };
@@ -110,10 +118,14 @@ const EventState = (props) => {
       return events;
     } catch (err) {
       console.error('Error searching events:', err);
+      const errorMessage = err.response?.data?.error || err.message || 
+        'An error occurred while searching. Please try again.';
+      
       dispatch({
         type: EVENT_ERROR,
-        payload: err.message || 'Failed to search events'
+        payload: errorMessage
       });
+      
       throw err;
     }
   };

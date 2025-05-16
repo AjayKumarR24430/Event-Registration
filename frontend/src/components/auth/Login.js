@@ -6,22 +6,15 @@ import useRtlContext from '../../contexts/rtl/rtlContext';
 const Login = () => {
   const { login, error, clearErrors, isAuthenticated } = useAuthContext();
   const { t } = useRtlContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Create a flag to track if component is mounted
-    let isMounted = true;
-    
-    // Only redirect if component is still mounted
-    if (isAuthenticated && isMounted) {
+    // Only redirect if authentication is successful
+    if (isAuthenticated) {
       navigate('/');
     }
-    
-    // Cleanup function to run when component unmounts
-    return () => {
-      isMounted = false;
-    };
     // eslint-disable-next-line
   }, [isAuthenticated]);
 
@@ -37,9 +30,18 @@ const Login = () => {
     if (error) clearErrors();
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    login({ email, password });
+    setIsSubmitting(true);
+    
+    try {
+      const success = await login({ email, password });
+      if (!success) {
+        setIsSubmitting(false);
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,6 +69,7 @@ const Login = () => {
               value={email}
               onChange={onChange}
               required
+              disabled={isSubmitting}
               className="form-input"
               placeholder="email@example.com"
             />
@@ -83,6 +86,7 @@ const Login = () => {
               value={password}
               onChange={onChange}
               required
+              disabled={isSubmitting}
               className="form-input"
               placeholder="********"
             />
@@ -91,9 +95,10 @@ const Login = () => {
           <div className="flex items-center justify-between">
             <button 
               type="submit" 
-              className="btn-primary w-full"
+              disabled={isSubmitting}
+              className={`btn-primary w-full ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {t('login')}
+              {isSubmitting ? 'Logging in...' : t('login')}
             </button>
           </div>
         </form>
