@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import useEventContext from '../../contexts/event/eventContext';
 import useRegistrationContext from '../../contexts/registration/registrationContext';
 import useRtlContext from '../../contexts/rtl/rtlContext';
@@ -7,7 +7,9 @@ import Spinner from '../layout/Spinner';
 import Alert from '../layout/Alert';
 
 const EventRegistrationsDashboard = () => {
-  const { events, getEvents, loading: eventsLoading } = useEventContext();
+  const { eventId } = useParams();
+  const navigate = useNavigate();
+  const { events, getEvents, getEventById, loading: eventsLoading } = useEventContext();
   const { 
     adminRegistrations, 
     getAdminRegistrations,
@@ -26,37 +28,105 @@ const EventRegistrationsDashboard = () => {
   
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const loadData = useCallback(async () => {
-    try {
+  // Initial data loading - separated into individual effects to prevent dependency cycles
+  useEffect(() => {
+    const loadInitialData = async () => {
+      if (initialLoadComplete) return;
+      
       setIsRefreshing(true);
+      try {
+        // First get events list
+        await getEvents();
+        // Then get admin registrations and stats
+        await getAdminRegistrations();
+        await getAdminStats();
+        // Finally get event stats
+        await getEventRegistrationStats();
+        
+        setInitialLoadComplete(true);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
+    
+    loadInitialData();
+  }, [getEvents, getAdminRegistrations, getAdminStats, getEventRegistrationStats, initialLoadComplete]);
+
+  // Handle event selection from URL
+  useEffect(() => {
+    const selectEventFromUrl = async () => {
+      if (!eventId || !initialLoadComplete) return;
+      
+      // First try to find the event in the loaded events list
+      const eventFromList = events.find(e => e._id === eventId);
+      
+      if (eventFromList) {
+        setSelectedEvent(eventFromList);
+      } else {
+        // If not found in list, fetch it directly
+        try {
+          const event = await getEventById(eventId);
+          if (event) {
+            setSelectedEvent(event);
+          }
+        } catch (error) {
+          console.error('Event not found:', error);
+        }
+      }
+    };
+    
+    selectEventFromUrl();
+  }, [eventId, initialLoadComplete, events, getEventById]);
+
+  // Load event registrations when an event is selected
+  useEffect(() => {
+    const loadEventRegistrations = async () => {
+      if (!selectedEvent) return;
+      
+      try {
+        await getEventRegistrations(selectedEvent._id);
+      } catch (error) {
+        console.error('Error loading event registrations:', error);
+      }
+    };
+    
+    loadEventRegistrations();
+  }, [selectedEvent, getEventRegistrations]);
+
+  // Update URL when event is selected but not from URL
+  useEffect(() => {
+    if (selectedEvent && !eventId) {
+      navigate(`/admin/events/${selectedEvent._id}/registrations`, { replace: true });
+    }
+  }, [selectedEvent, navigate, eventId]);
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    try {
       await Promise.all([
         getEvents(),
         getAdminRegistrations(),
         getAdminStats(),
         getEventRegistrationStats()
       ]);
+      
+      if (selectedEvent) {
+        await getEventRegistrations(selectedEvent._id);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error refreshing data:', error);
     } finally {
       setIsRefreshing(false);
     }
-  }, [getEvents, getAdminRegistrations, getAdminStats, getEventRegistrationStats]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  useEffect(() => {
-    if (selectedEvent) {
-      getEventRegistrations(selectedEvent._id);
-    }
-  }, [selectedEvent, getEventRegistrations]);
+  };
 
   const handleApprove = async (registrationId) => {
     try {
       await approveRegistration(registrationId);
-      await loadData();
       if (selectedEvent) {
         await getEventRegistrations(selectedEvent._id);
       }
@@ -70,7 +140,6 @@ const EventRegistrationsDashboard = () => {
       const reason = window.prompt('Please provide a reason for rejection:');
       if (reason !== null) {
         await rejectRegistration(registrationId, reason);
-        await loadData();
         if (selectedEvent) {
           await getEventRegistrations(selectedEvent._id);
         }
@@ -91,11 +160,11 @@ const EventRegistrationsDashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-blue-500 bg-clip-text text-transparent">
           {isRtl ? 'إدارة التسجيلات حسب الفعالية' : 'Event Registration Management'}
         </h2>
         <button
-          onClick={loadData}
+          onClick={refreshData}
           disabled={isRefreshing}
           className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center"
         >
@@ -227,53 +296,61 @@ const EventRegistrationsDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {eventRegistrations.map(registration => (
-                  <tr key={registration._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {registration.user?.username || registration.user?.email || 'Unknown User'}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {registration.user?.email}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        registration.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        registration.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(registration.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {registration.status === 'pending' ? (
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleApprove(registration._id)}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition duration-200"
-                          >
-                            {isRtl ? 'موافقة' : 'Approve'}
-                          </button>
-                          <button
-                            onClick={() => handleReject(registration._id)}
-                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition duration-200"
-                          >
-                            {isRtl ? 'رفض' : 'Reject'}
-                          </button>
+                {eventRegistrations && eventRegistrations.length > 0 ? (
+                  eventRegistrations.map(registration => (
+                    <tr key={registration._id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {registration.user?.username || registration.user?.email || 'Unknown User'}
                         </div>
-                      ) : (
-                        <span className="text-gray-500 italic">
-                          {registration.status === 'approved' ? 'Approved' : 'Rejected'} 
-                          {registration.reason ? ` - ${registration.reason}` : ''}
+                        <div className="text-sm text-gray-500">
+                          {registration.user?.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          registration.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          registration.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
                         </span>
-                      )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(registration.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {registration.status === 'pending' ? (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleApprove(registration._id)}
+                              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition duration-200"
+                            >
+                              {isRtl ? 'موافقة' : 'Approve'}
+                            </button>
+                            <button
+                              onClick={() => handleReject(registration._id)}
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition duration-200"
+                            >
+                              {isRtl ? 'رفض' : 'Reject'}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 italic">
+                            {registration.status === 'approved' ? 'Approved' : 'Rejected'} 
+                            {registration.reason ? ` - ${registration.reason}` : ''}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                      No registrations found for this event
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

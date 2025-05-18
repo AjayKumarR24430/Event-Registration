@@ -89,6 +89,16 @@ const Home = () => {
     }
   }, [getEvents]);
 
+  // Log events and categories when they're loaded
+  useEffect(() => {
+    if (events && events.length > 0) {
+      console.log('Loaded events with categories:');
+      events.forEach(event => {
+        console.log(`${event.title}: "${event.category}"`);
+      });
+    }
+  }, [events]);
+
   useEffect(() => {
     if (isInitialLoad) {
       loadEvents();
@@ -96,14 +106,44 @@ const Home = () => {
   }, [isInitialLoad, loadEvents]);
   
   // Mock categories
-  const categories = [
-    { id: 'all', name: 'All Events', icon: FaCalendarAlt },
-    { id: 'tech', name: 'Tech', icon: FaLaptop },
-    { id: 'music', name: 'Music', icon: FaMusic },
-    { id: 'education', name: 'Education', icon: FaGraduationCap },
-    { id: 'food', name: 'Food & Drink', icon: FaUtensils },
-    { id: 'health', name: 'Health', icon: FaHeartbeat }
-  ];
+  const [dynamicCategories, setDynamicCategories] = useState([
+    { id: 'all', name: 'All Events', icon: FaCalendarAlt }
+  ]);
+  
+  // Map category names to icons
+  const categoryIcons = {
+    'Tech': FaLaptop,
+    'Music': FaMusic,
+    'Education': FaGraduationCap,
+    'Food & Drink': FaUtensils,
+    'Health': FaHeartbeat,
+    // Add fallback icon for any other category
+    'default': FaCalendarAlt
+  };
+  
+  // Get unique categories from actual events
+  useEffect(() => {
+    if (events && events.length > 0) {
+      // Extract unique categories
+      const uniqueCategories = [...new Set(events.map(event => event.category))]
+        .filter(Boolean) // Remove null or undefined values
+        .sort();
+      
+      console.log('Unique categories found:', uniqueCategories);
+      
+      // Create dynamic categories array with appropriate icons
+      const categories = [
+        { id: 'all', name: 'All Events', icon: FaCalendarAlt },
+        ...uniqueCategories.map(category => ({
+          id: category,
+          name: category,
+          icon: categoryIcons[category] || categoryIcons.default
+        }))
+      ];
+      
+      setDynamicCategories(categories);
+    }
+  }, [events]);
   
   // Mock testimonials
   const testimonials = [
@@ -142,9 +182,19 @@ const Home = () => {
   const featuredEvents = getFeaturedEvents();
   
   const filteredEvents = featuredEvents.filter(event => {
-    const matchesCategory = activeCategory === 'all' || event.category === activeCategory;
+    // Case-insensitive comparison for categories
+    const matchesCategory = activeCategory === 'all' || 
+                           (event.category && 
+                             (event.category.toLowerCase() === activeCategory.toLowerCase() ||
+                              event.category === activeCategory));
+                            
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (activeCategory !== 'all' && !matchesCategory) {
+      console.log(`Event "${event.title}" with category "${event.category}" doesn't match "${activeCategory}"`);
+    }
+    
     return matchesCategory && matchesSearch;
   });
 
@@ -313,7 +363,7 @@ const Home = () => {
           
           {/* Categories */}
           <div className="flex flex-wrap gap-2 mb-8 animate-fadeIn">
-            {categories.map((category) => {
+            {dynamicCategories.map((category) => {
               const Icon = category.icon;
               return (
                 <button

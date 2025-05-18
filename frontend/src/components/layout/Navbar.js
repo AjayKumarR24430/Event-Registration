@@ -147,7 +147,7 @@ const Navbar = () => {
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled 
           ? 'glass dark:glass-dark shadow-lg py-2' 
-          : 'bg-gradient-to-r from-indigo-600/95 to-purple-600/95 backdrop-blur-md py-4 text-white'
+          : 'bg-gradient-to-r from-teal-500/95 to-blue-500/95 backdrop-blur-md py-4 text-white'
       }`}
     >
       <div className="container-custom">
@@ -160,7 +160,7 @@ const Navbar = () => {
               <FaCalendarAlt className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
               <span className={`transform group-hover:scale-105 transition-transform duration-300 ${
                 isScrolled 
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent' 
+                  ? 'bg-gradient-to-r from-teal-500 to-blue-500 dark:from-teal-400 dark:to-blue-400 bg-clip-text text-transparent' 
                   : 'text-white'
               }`}>
                 {t('EventHub')}

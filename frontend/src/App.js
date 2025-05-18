@@ -109,6 +109,14 @@ const AppRoutes = () => {
               </AdminRoute>
             } 
           />
+          <Route 
+            path="/admin/events/:eventId/registrations" 
+            element={
+              <AdminRoute>
+                <EventRegistrationsDashboard />
+              </AdminRoute>
+            } 
+          />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/faq" element={<FAQPage />} />

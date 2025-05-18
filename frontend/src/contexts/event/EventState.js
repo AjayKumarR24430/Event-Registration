@@ -321,12 +321,14 @@ const EventState = (props) => {
         loading: state.loading,
         getEvents,
         getEvent,
+        getEventById: getEvent,
         addEvent,
         updateEvent,
         deleteEvent,
         clearEvent,
-        searchEvents,
-        clearSearch
+        filterEvents,
+        clearFilter,
+        searchEvents
       }}
     >
       {props.children}

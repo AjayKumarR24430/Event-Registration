@@ -26,7 +26,7 @@ const RegistrationState = (props) => {
     stats: null,
     current: null,
     error: null,
-    loading: true
+    loading: false
   };
 
   const [state, dispatch] = useReducer(registrationReducer, initialState);
@@ -76,22 +76,13 @@ const RegistrationState = (props) => {
   const getAdminRegistrations = useCallback(async () => {
     setLoading();
     try {
-      // Fetch both registrations and stats in parallel
-      const [registrationsRes, statsRes] = await Promise.all([
-        api.get('/admin/registrations'),
-        api.get('/admin/stats')
-      ]);
+      // Fetch registrations only - stats are fetched separately to avoid circular dependencies
+      const registrationsRes = await api.get('/admin/registrations');
 
-      // Update registrations first
+      // Update registrations
       dispatch({
         type: GET_ADMIN_REGISTRATIONS,
         payload: registrationsRes.data.data
-      });
-      
-      // Then update stats
-      dispatch({
-        type: GET_ADMIN_STATS,
-        payload: statsRes.data.data
       });
       
       return registrationsRes.data.data;
@@ -162,8 +153,7 @@ const RegistrationState = (props) => {
         payload: res.data.data
       });
       
-      // Refresh admin registrations list
-      await getAdminRegistrations();
+      // Removed getAdminRegistrations call to prevent circular dependencies
       
       return res.data.data;
     } catch (err) {
@@ -173,7 +163,7 @@ const RegistrationState = (props) => {
       });
       throw err;
     }
-  }, [setLoading, getAdminRegistrations]);
+  }, [setLoading]);
 
   // Reject Registration
   const rejectRegistration = useCallback(async (id, reason) => {
@@ -186,8 +176,7 @@ const RegistrationState = (props) => {
         payload: res.data.data
       });
       
-      // Refresh admin registrations list
-      await getAdminRegistrations();
+      // Removed getAdminRegistrations call to prevent circular dependencies
       
       return res.data;
     } catch (err) {
@@ -197,7 +186,7 @@ const RegistrationState = (props) => {
       });
       throw err;
     }
-  }, [setLoading, getAdminRegistrations]);
+  }, [setLoading]);
 
   // Clear Registration
   const clearRegistration = useCallback(() => {
