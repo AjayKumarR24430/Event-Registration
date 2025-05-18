@@ -5,6 +5,7 @@ import useAuthContext from '../contexts/auth/authContext';
 import useRegistrationContext from '../contexts/registration/registrationContext';
 import Spinner from '../components/layout/Spinner';
 import { Link } from 'react-router-dom';
+import { FaEdit, FaUsers, FaCalendarAlt } from 'react-icons/fa';
 
 const EventDetailPage = () => {
   const { id } = useParams();
@@ -14,6 +15,8 @@ const EventDetailPage = () => {
   const { registerForEvent, getUserRegistrationForEvent, current: registration, loading: registrationLoading } = useRegistrationContext();
   const [registrationStatus, setRegistrationStatus] = useState(null);
   const [loadError, setLoadError] = useState(null);
+  
+  const isAdmin = user?.role === 'admin';
 
   // Load event data
   useEffect(() => {
@@ -35,12 +38,12 @@ const EventDetailPage = () => {
   // Load registration status
   useEffect(() => {
     const loadRegistrationStatus = async () => {
-      if (isAuthenticated && user) {
+      if (isAuthenticated && user && !isAdmin) {
         await getUserRegistrationForEvent(id);
       }
     };
     loadRegistrationStatus();
-  }, [id, isAuthenticated, user, getUserRegistrationForEvent]);
+  }, [id, isAuthenticated, user, getUserRegistrationForEvent, isAdmin]);
 
   // Update registration status when registration changes
   useEffect(() => {
@@ -102,6 +105,34 @@ const EventDetailPage = () => {
   }
 
   const getRegistrationStatusUI = () => {
+    // For admin users, show admin controls instead of registration options
+    if (isAdmin) {
+      return {
+        containerClass: 'bg-blue-50 border border-blue-200',
+        icon: '⚙️',
+        title: 'Admin Controls',
+        message: 'You are viewing this event as an administrator',
+        actionButton: (
+          <div className="flex flex-col space-y-3 mt-4">
+            <Link
+              to={`/admin/events/${id}`}
+              className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-200 text-lg font-medium flex items-center justify-center gap-2"
+            >
+              <FaEdit className="w-5 h-5" />
+              <span>Edit Event</span>
+            </Link>
+            <Link
+              to={`/admin/registrations?event=${id}`}
+              className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-200 text-lg font-medium flex items-center justify-center gap-2"
+            >
+              <FaUsers className="w-5 h-5" />
+              <span>View Registrations</span>
+            </Link>
+          </div>
+        )
+      };
+    }
+
     if (!isAuthenticated) {
       return {
         containerClass: 'bg-gray-50 border border-gray-200',
@@ -180,6 +211,16 @@ const EventDetailPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Admin header - only shown to admins */}
+        {isAdmin && (
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-4 px-6">
+            <h2 className="text-white text-xl font-medium flex items-center gap-2">
+              <FaCalendarAlt className="w-5 h-5" />
+              Admin Event View
+            </h2>
+          </div>
+        )}
+        
         <div className="p-6">
           <h1 className="text-3xl font-bold mb-6">{currentEvent.title}</h1>
           
@@ -226,8 +267,33 @@ const EventDetailPage = () => {
                       <p className="font-medium">${currentEvent.price}</p>
                     </div>
                   )}
+                  <div>
+                    <p className="text-gray-600">Capacity</p>
+                    <p className="font-medium">{currentEvent.capacity}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Available Spots</p>
+                    <p className="font-medium">{currentEvent.availableSpots}</p>
+                  </div>
                 </div>
               </div>
+              
+              {/* Additional admin details */}
+              {isAdmin && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold mb-4">Admin Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-gray-600">Created By</p>
+                      <p className="font-medium">{currentEvent.user?.name || 'System'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Created Date</p>
+                      <p className="font-medium">{new Date(currentEvent.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
