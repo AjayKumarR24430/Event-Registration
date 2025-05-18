@@ -116,6 +116,7 @@ const SearchEvents = () => {
               <option value="workshop">{isRtl ? 'ورشة عمل' : 'Workshop'}</option>
               <option value="seminar">{isRtl ? 'ندوة' : 'Seminar'}</option>
               <option value="networking">{isRtl ? 'تواصل' : 'Networking'}</option>
+              <option value="health">{isRtl ? 'صحة' : 'Health'}</option>
               <option value="other">{isRtl ? 'أخرى' : 'Other'}</option>
             </select>
           </div>

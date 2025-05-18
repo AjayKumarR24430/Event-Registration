@@ -18,6 +18,10 @@ import AdminRegistrationsPage from './pages/AdminRegistrationsPage';
 import AdminEventsPage from './pages/AdminEventsPage';
 import EventRegistrationsDashboard from './components/admin/EventRegistrationsDashboard';
 import AdminEventDetails from './components/admin/AdminEventDetails';
+import AboutPage from './components/pages/AboutPage';
+import ContactPage from './components/pages/ContactPage';
+import FAQPage from './components/pages/FAQPage';
+import LegalPage from './components/pages/LegalPage';
 
 // Context Providers
 import AuthState from './contexts/auth/AuthState';
@@ -105,6 +109,10 @@ const AppRoutes = () => {
               </AdminRoute>
             } 
           />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/legal" element={<LegalPage />} />
         </Routes>
       </main>
       <Footer />
