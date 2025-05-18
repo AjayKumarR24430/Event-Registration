@@ -12,26 +12,66 @@ const LegalPage = () => {
   ];
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="relative py-16 bg-gradient-to-r from-indigo-600 to-purple-600 text-white overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
+      <div className="relative py-20 bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-pattern-grid opacity-10"></div>
+        
+        {/* Animated Blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -left-20 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-20 left-10 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        {/* Bottom Wave - Now positioned higher to cover content */}
+        <div className="absolute bottom-0 left-0 w-full h-full pointer-events-none">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 1440 320" 
+            className="w-full h-full absolute bottom-0"
+            preserveAspectRatio="none"
+            style={{ minHeight: '320px' }}
+          >
+            <path 
+              fill="#ffffff" 
+              fillOpacity="1" 
+              d="M0,256L40,240C80,224,160,192,240,186.7C320,181,400,203,480,192C560,181,640,139,720,149.3C800,160,880,224,960,229.3C1040,235,1120,181,1200,144C1280,107,1360,85,1400,74.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+            ></path>
+          </svg>
         </div>
         
         <div className="container-custom relative z-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 animate-fadeIn text-white shadow-lg shadow-black/30" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Legal Information</h1>
-            <p className="text-xl text-white animate-slideUp">
+            <div className="inline-flex items-center justify-center px-4 py-1 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white mb-6">
+              Important Information
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">
+              Legal Information
+            </h1>
+            
+            <p className="text-xl text-indigo-100 animate-slideUp max-w-2xl mx-auto">
               Our commitment to transparency and data protection
             </p>
           </div>
         </div>
-        
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
-            <path fill="#f9fafb" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+      </div>
+
+      {/* Second Wave for a smoother transition */}
+      <div className="relative h-32 bg-white dark:bg-gray-800 -mt-2">
+        <div className="absolute -top-32 left-0 w-full overflow-hidden">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+            className="w-full"
+            preserveAspectRatio="none"
+          >
+            <path
+              fill="#ffffff"
+              fillOpacity="1"
+              d="M0,96L48,122.7C96,149,192,203,288,202.7C384,203,480,149,576,117.3C672,85,768,75,864,85.3C960,96,1056,128,1152,138.7C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
           </svg>
         </div>
       </div>
@@ -248,12 +288,7 @@ const LegalPage = () => {
                 
                 <h3>6. Updates to This Cookie Policy</h3>
                 <p>
-                  We may update our Cookie Policy from time to time. We will notify you of any changes by posting the new Cookie Policy on this page.
-                </p>
-                
-                <h3>7. Contact Us</h3>
-                <p>
-                  If you have any questions about our Cookie Policy, please contact us at privacy@eventplatform.com.
+                  We may update our Cookie Policy from time to time. We will notify you of any changes by posting the new Cookie Policy on this page and updating the "last updated" date.
                 </p>
               </div>
             )}
@@ -263,70 +298,75 @@ const LegalPage = () => {
                 <h2>GDPR Compliance</h2>
                 <p className="lead">Last updated: December 1, 2023</p>
                 
-                <h3>1. Introduction to GDPR</h3>
+                <h3>1. Introduction</h3>
                 <p>
-                  The General Data Protection Regulation (GDPR) is a regulation in EU law on data protection and privacy for all individuals within the European Union and the European Economic Area. It addresses the export of personal data outside the EU and EEA areas.
+                  This GDPR Compliance statement explains how our event registration platform ("Service") complies with the European Union's General Data Protection Regulation (GDPR). We are committed to protecting the personal data of our users and ensuring that our data processing activities are lawful, fair, and transparent.
                 </p>
                 
-                <h3>2. Our Commitment to GDPR Compliance</h3>
+                <h3>2. Data Controller</h3>
                 <p>
-                  We are committed to ensuring that your privacy is protected in accordance with the GDPR. We strive to use commercially acceptable means to protect your Personal Data, and we implement various measures to help maintain the safety of your personal information.
+                  For the purposes of the GDPR, our company acts as a data controller for the personal data we collect from you. This means we determine the purposes and means of processing your personal data.
                 </p>
                 
                 <h3>3. Legal Basis for Processing</h3>
                 <p>
-                  Under the GDPR, we need to have a legal basis for processing your personal data. The legal bases we rely on include:
+                  We process personal data on the following legal bases:
                 </p>
                 <ul>
-                  <li><strong>Consent:</strong> Where you have given us clear consent to process your personal data for a specific purpose.</li>
-                  <li><strong>Contract:</strong> Where processing is necessary for the performance of a contract we have with you, or because you have asked us to take specific steps before entering into a contract.</li>
-                  <li><strong>Legal obligation:</strong> Where processing is necessary for us to comply with the law.</li>
-                  <li><strong>Legitimate interests:</strong> Where processing is necessary for our legitimate interests or the legitimate interests of a third party, unless there is a good reason to protect your personal data which overrides those legitimate interests.</li>
+                  <li><strong>Consent:</strong> When you have given explicit consent to the processing of your personal data for specific purposes.</li>
+                  <li><strong>Contractual Necessity:</strong> When processing is necessary for the performance of a contract with you (e.g., to provide the Service you have signed up for).</li>
+                  <li><strong>Legal Obligation:</strong> When processing is necessary to comply with a legal obligation to which we are subject.</li>
+                  <li><strong>Legitimate Interests:</strong> When processing is necessary for the purposes of the legitimate interests pursued by us or a third party, except where such interests are overridden by your interests or fundamental rights and freedoms.</li>
                 </ul>
                 
                 <h3>4. Your Rights Under GDPR</h3>
                 <p>
-                  The GDPR provides the following rights for individuals:
+                  The GDPR provides you with the following rights regarding your personal data:
                 </p>
                 <ul>
-                  <li><strong>The right to be informed:</strong> About how we collect and use your personal data.</li>
-                  <li><strong>The right of access:</strong> To your personal data and supplementary information.</li>
-                  <li><strong>The right to rectification:</strong> To have inaccurate personal data rectified, or completed if it is incomplete.</li>
-                  <li><strong>The right to erasure:</strong> To have your personal data erased in certain circumstances.</li>
-                  <li><strong>The right to restrict processing:</strong> To request the restriction or suppression of your personal data in certain circumstances.</li>
-                  <li><strong>The right to data portability:</strong> To obtain and reuse your personal data for your own purposes across different services.</li>
-                  <li><strong>The right to object:</strong> To processing of your personal data in certain circumstances.</li>
-                  <li><strong>Rights in relation to automated decision making and profiling:</strong> Safeguards to protect against the risk that a potentially damaging decision is taken without human intervention.</li>
+                  <li><strong>Right to Information:</strong> You have the right to be informed about how we collect and use your personal data.</li>
+                  <li><strong>Right of Access:</strong> You have the right to request a copy of the personal data we hold about you.</li>
+                  <li><strong>Right to Rectification:</strong> You have the right to have inaccurate personal data rectified, or completed if it is incomplete.</li>
+                  <li><strong>Right to Erasure (Right to be Forgotten):</strong> You have the right to request the deletion of your personal data in certain circumstances.</li>
+                  <li><strong>Right to Restrict Processing:</strong> You have the right to request the restriction or suppression of your personal data in certain circumstances.</li>
+                  <li><strong>Right to Data Portability:</strong> You have the right to obtain and reuse your personal data for your own purposes across different services.</li>
+                  <li><strong>Right to Object:</strong> You have the right to object to the processing of your personal data in certain circumstances, including processing for direct marketing purposes.</li>
+                  <li><strong>Rights related to Automated Decision Making and Profiling:</strong> You have the right not to be subject to a decision based solely on automated processing, including profiling, which produces legal effects concerning you or similarly significantly affects you.</li>
                 </ul>
                 
-                <h3>5. Data Subject Access Requests</h3>
+                <h3>5. How to Exercise Your Rights</h3>
                 <p>
-                  You have the right to request access to the personal data we hold about you. To make a request, please contact our Data Protection Officer at dpo@eventplatform.com. We will respond to your request within one month of receipt.
+                  You can exercise your rights by contacting our Data Protection Officer at dpo@eventplatform.com. We will respond to your request within one month. This period may be extended by two further months if necessary, taking into account the complexity and number of requests.
                 </p>
                 
-                <h3>6. Data Breach Notification</h3>
+                <h3>6. Data Transfers Outside the EEA</h3>
                 <p>
-                  In the case of a personal data breach, we shall, without undue delay and, where feasible, not later than 72 hours after having become aware of it, notify the personal data breach to the supervisory authority, unless the personal data breach is unlikely to result in a risk to your rights and freedoms.
-                </p>
-                
-                <h3>7. Data Protection Officer</h3>
-                <p>
-                  We have appointed a Data Protection Officer (DPO) who is responsible for overseeing questions in relation to this privacy policy. If you have any questions about this policy, please contact our DPO at dpo@eventplatform.com.
-                </p>
-                
-                <h3>8. International Data Transfers</h3>
-                <p>
-                  We may transfer your personal data to countries outside the European Economic Area (EEA). Whenever we transfer your personal data out of the EEA, we ensure a similar degree of protection is afforded to it by ensuring at least one of the following safeguards is implemented:
+                  We may transfer your personal data to countries outside the European Economic Area (EEA). When we do, we ensure that similar protection is afforded to your data by implementing at least one of the following safeguards:
                 </p>
                 <ul>
                   <li>We will only transfer your personal data to countries that have been deemed to provide an adequate level of protection for personal data by the European Commission.</li>
-                  <li>Where we use certain service providers, we may use specific contracts approved by the European Commission which give personal data the same protection it has in Europe.</li>
-                  <li>Where we use providers based in the US, we may transfer data to them if they are part of a framework that ensures they provide similar protection to personal data shared between the Europe and the US.</li>
+                  <li>We may use specific contracts approved by the European Commission which give personal data the same protection it has in Europe.</li>
+                  <li>Where we use providers based in the US, we may transfer data to them if they are part of the Privacy Shield which requires them to provide similar protection to personal data shared between Europe and the US.</li>
                 </ul>
                 
-                <h3>9. Contact Us</h3>
+                <h3>7. Data Protection Impact Assessments</h3>
                 <p>
-                  If you have any questions about our GDPR compliance or how we handle your personal data, please contact our Data Protection Officer at dpo@eventplatform.com.
+                  We conduct Data Protection Impact Assessments (DPIAs) when introducing new technologies or processing activities that are likely to result in a high risk to your rights and freedoms. DPIAs help us identify and minimize data protection risks.
+                </p>
+                
+                <h3>8. Data Breach Notification</h3>
+                <p>
+                  In the event of a personal data breach, we will notify the relevant supervisory authority within 72 hours of becoming aware of the breach, where feasible. If the breach is likely to result in a high risk to your rights and freedoms, we will also notify you without undue delay.
+                </p>
+                
+                <h3>9. Data Protection Officer</h3>
+                <p>
+                  We have appointed a Data Protection Officer (DPO) who is responsible for overseeing questions in relation to this privacy notice. If you have any questions about this privacy notice, including any requests to exercise your legal rights, please contact our DPO at dpo@eventplatform.com.
+                </p>
+                
+                <h3>10. Complaints</h3>
+                <p>
+                  You have the right to make a complaint at any time to the relevant supervisory authority for data protection issues in your jurisdiction. We would, however, appreciate the chance to deal with your concerns before you approach the supervisory authority, so please contact us in the first instance.
                 </p>
               </div>
             )}
@@ -341,7 +381,7 @@ const LegalPage = () => {
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Have Questions About Our <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Legal Policies?</span>
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-8">
               Our legal team is available to help clarify any concerns regarding our terms, privacy practices, or compliance efforts.
             </p>
             <button className="btn btn-primary">

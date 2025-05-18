@@ -6,27 +6,49 @@ import {
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
+      <div className="relative py-20 bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-pattern-grid opacity-10"></div>
+        
+        {/* Animated Blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -left-20 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-20 left-10 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        {/* Bottom Wave - Now positioned higher to cover content */}
+        <div className="absolute bottom-0 left-0 w-full h-full pointer-events-none">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 1440 320" 
+            className="w-full h-full absolute bottom-0"
+            preserveAspectRatio="none"
+            style={{ minHeight: '320px' }}
+          >
+            <path 
+              fill="#ffffff" 
+              fillOpacity="1" 
+              d="M0,256L40,240C80,224,160,192,240,186.7C320,181,400,203,480,192C560,181,640,139,720,149.3C800,160,880,224,960,229.3C1040,235,1120,181,1200,144C1280,107,1360,85,1400,74.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+            ></path>
+          </svg>
         </div>
         
         <div className="container-custom relative z-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 animate-fadeIn text-white shadow-lg shadow-black/30" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>About Us</h1>
-            <p className="text-xl text-white animate-slideUp">
-              We're on a mission to bring people together through amazing events
+            <div className="inline-flex items-center justify-center px-4 py-1 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white mb-6">
+              Our Story
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">
+              About EventHub
+            </h1>
+            
+            <p className="text-xl text-indigo-100 animate-slideUp max-w-2xl mx-auto">
+              We're on a mission to bring people together through amazing events and create unforgettable experiences
             </p>
           </div>
-        </div>
-        
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
-            <path fill="#f9fafb" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-          </svg>
         </div>
       </div>
 
@@ -41,10 +63,10 @@ const AboutPage = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
                 Creating Memorable <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Experiences</span> Since 2018
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 Our journey began with a simple idea: to create a platform that makes it easy to discover, join, and host events that matter. Whether you're looking for professional networking, skill development, or just a fun night out, we've got you covered.
               </p>
-              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 Over the years, we've helped thousands of people connect through events across multiple industries and interests. Our platform is now used by individuals and organizations worldwide to create meaningful connections and unforgettable experiences.
               </p>
             </div>
@@ -84,7 +106,7 @@ const AboutPage = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Guided by <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Strong Principles</span>
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               At our core, we believe in creating a platform that brings value to everyone involved. Our values shape how we build our product and interact with our community.
             </p>
           </div>
@@ -126,7 +148,7 @@ const AboutPage = () => {
                   <value.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{value.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{value.description}</p>
+                <p className="text-gray-700 dark:text-gray-300">{value.description}</p>
               </div>
             ))}
           </div>
@@ -143,7 +165,7 @@ const AboutPage = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
               Meet the <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Talented People</span> Behind the Platform
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
               Our diverse team of experts is dedicated to creating the best event experience platform. We combine technical expertise with a passion for bringing people together.
             </p>
           </div>

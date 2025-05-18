@@ -46,27 +46,49 @@ const ContactPage = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
+      <div className="relative py-20 bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-pattern-grid opacity-10"></div>
+        
+        {/* Animated Blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -left-20 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-20 left-10 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        {/* Bottom Wave - Now positioned higher to cover content */}
+        <div className="absolute bottom-0 left-0 w-full h-full pointer-events-none">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 1440 320" 
+            className="w-full h-full absolute bottom-0"
+            preserveAspectRatio="none"
+            style={{ minHeight: '320px' }}
+          >
+            <path 
+              fill="#ffffff" 
+              fillOpacity="1" 
+              d="M0,256L40,240C80,224,160,192,240,186.7C320,181,400,203,480,192C560,181,640,139,720,149.3C800,160,880,224,960,229.3C1040,235,1120,181,1200,144C1280,107,1360,85,1400,74.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+            ></path>
+          </svg>
         </div>
         
         <div className="container-custom relative z-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 animate-fadeIn text-white shadow-lg shadow-black/30" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Contact Us</h1>
-            <p className="text-xl text-white animate-slideUp">
-              Get in touch with our team for any questions or inquiries
+            <div className="inline-flex items-center justify-center px-4 py-1 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white mb-6">
+              Get In Touch
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">
+              Contact Us
+            </h1>
+            
+            <p className="text-xl text-indigo-100 animate-slideUp max-w-2xl mx-auto">
+              We'd love to hear from you. Reach out for any questions, feedback, or support needs
             </p>
           </div>
-        </div>
-        
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
-            <path fill="#f9fafb" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-          </svg>
         </div>
       </div>
 
@@ -80,7 +102,7 @@ const ContactPage = () => {
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
                   Get in <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Touch</span>
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-8">
+                <p className="text-gray-700 dark:text-gray-300 mb-8">
                   Have a question about our platform, or want to learn more about how we can help you organize successful events? Reach out to us using any of the contact methods below, or fill out the form and we'll get back to you as soon as possible.
                 </p>
               </div>
@@ -92,7 +114,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-1">Visit Us</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-700 dark:text-gray-300">
                       123 Event Avenue, Suite 200<br />
                       San Francisco, CA 94107
                     </p>
@@ -105,7 +127,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-1">Call Us</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-700 dark:text-gray-300">
                       +1 (555) 123-4567<br />
                       Mon-Fri, 9AM-6PM PST
                     </p>
@@ -118,7 +140,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900 dark:text-white mb-1">Email Us</h3>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-700 dark:text-gray-300">
                       info@eventplatform.com<br />
                       support@eventplatform.com
                     </p>
@@ -161,7 +183,7 @@ const ContactPage = () => {
                       <FaCheck className="w-8 h-8 text-green-600" />
                     </div>
                     <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Thank You!</h4>
-                    <p className="text-gray-600 dark:text-gray-300">Your message has been sent successfully.</p>
+                    <p className="text-gray-700 dark:text-gray-300">Your message has been sent successfully.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -258,54 +280,18 @@ const ContactPage = () => {
       </div>
 
       {/* Map Section */}
-      <div className="py-20 bg-gray-50 dark:bg-gray-900">
+      <div className="py-12 bg-gray-50 dark:bg-gray-900">
         <div className="container-custom">
-          <div className="text-center max-w-3xl mx-auto mb-12 animate-fadeIn">
-            <div className="inline-block bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-lg font-medium text-sm mb-4">
-              Visit Our Office
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-              Find Us on the <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Map</span>
-            </h2>
-          </div>
-          
-          <div className="rounded-2xl overflow-hidden shadow-xl animate-slideUp">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.4212843605384!2d-122.39633028491232!3d37.78296211898226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085807abad77c31%3A0xd9532dfa817ad4c!2sSan%20Francisco%2C%20CA%2094107!5e0!3m2!1sen!2sus!4v1660056971124!5m2!1sen!2sus" 
-              width="100%" 
-              height="500" 
-              style={{ border: 0 }} 
-              allowFullScreen="" 
-              loading="lazy" 
+          <div className="rounded-xl overflow-hidden shadow-lg h-96">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1134346646177!2d-122.41947688439044!3d37.77492657975922!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808580a683a3ce15%3A0x36384c5e1f3851dd!2sSan%20Francisco%2C%20CA%2094107!5e0!3m2!1sen!2sus!4v1649790839784!5m2!1sen!2sus"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Office Location"
             ></iframe>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="py-20 mt-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white relative overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
-        </div>
-        
-        <div className="container-custom relative z-10">
-          <div className="max-w-3xl mx-auto text-center animate-fadeIn">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Need Immediate Assistance?</h2>
-            <p className="text-xl text-white mb-10">
-              Our support team is available to help you get the most out of our platform
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <button className="btn bg-white text-indigo-600 hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/30">
-                <FaPhoneAlt className="w-4 h-4 mr-2" />
-                Call Support
-              </button>
-              <button className="btn btn-outline border-white text-white hover:bg-white/10">
-                <FaEnvelope className="w-4 h-4 mr-2" />
-                Live Chat
-              </button>
-            </div>
           </div>
         </div>
       </div>

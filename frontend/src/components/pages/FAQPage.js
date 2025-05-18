@@ -134,40 +134,92 @@ const FAQPage = () => {
     : faqData[activeCategory] || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="relative py-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
+      <div className="relative py-20 bg-gradient-to-br from-indigo-800 via-purple-800 to-indigo-900 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-pattern-grid opacity-10"></div>
+        
+        {/* Animated Blobs */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply opacity-20 animate-blob"></div>
+          <div className="absolute top-0 -left-20 w-72 h-72 bg-indigo-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-20 left-10 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        {/* Bottom Wave - Now positioned higher to cover content */}
+        <div className="absolute bottom-0 left-0 w-full h-full pointer-events-none">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 1440 320" 
+            className="w-full h-full absolute bottom-0"
+            preserveAspectRatio="none"
+            style={{ minHeight: '320px' }}
+          >
+            <path 
+              fill="#ffffff" 
+              fillOpacity="1" 
+              d="M0,256L40,240C80,224,160,192,240,186.7C320,181,400,203,480,192C560,181,640,139,720,149.3C800,160,880,224,960,229.3C1040,235,1120,181,1200,144C1280,107,1360,85,1400,74.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+            ></path>
+          </svg>
         </div>
         
         <div className="container-custom relative z-20">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 animate-fadeIn text-white shadow-lg shadow-black/30" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Frequently Asked Questions</h1>
-            <p className="text-xl text-white mb-8 animate-slideUp">
+            <div className="inline-flex items-center justify-center px-4 py-1 rounded-full bg-white/10 backdrop-blur-sm text-sm font-medium text-white mb-6">
+              Helpful Answers
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">
+              Frequently Asked Questions
+            </h1>
+            
+            <p className="text-xl text-indigo-100 mb-8 animate-slideUp max-w-2xl mx-auto">
               Find answers to common questions about our event platform
             </p>
             
             {/* Search Box */}
             <div className="relative max-w-2xl mx-auto">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FaSearch className="text-indigo-300" />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for questions or keywords..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-4 pl-12 pr-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300"
+                />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FaSearch className="text-indigo-200" />
+                </div>
+                {searchQuery && (
+                  <button 
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/70 hover:text-white"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
-              <input
-                type="text"
-                placeholder="Search for questions or keywords..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-4 pl-12 pr-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300"
-              />
             </div>
           </div>
         </div>
-        
-        {/* Bottom Wave */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
-            <path fill="#f9fafb" fillOpacity="1" d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,218.7C1120,224,1280,192,1360,176L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+      </div>
+
+      {/* Second Wave for a smoother transition */}
+      <div className="relative h-32 bg-white dark:bg-gray-800 -mt-2">
+        <div className="absolute -top-32 left-0 w-full overflow-hidden">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 320"
+            className="w-full"
+            preserveAspectRatio="none"
+          >
+            <path
+              fill="#ffffff"
+              fillOpacity="1"
+              d="M0,96L48,122.7C96,149,192,203,288,202.7C384,203,480,149,576,117.3C672,85,768,75,864,85.3C960,96,1056,128,1152,138.7C1248,149,1344,139,1392,133.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
           </svg>
         </div>
       </div>
@@ -204,7 +256,7 @@ const FAQPage = () => {
                   <FaSearch className="w-8 h-8 text-indigo-500" />
                 </div>
                 <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No Results Found</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p className="text-gray-700 dark:text-gray-300 mb-6">
                   We couldn't find any questions matching "{searchQuery}"
                 </p>
                 <button 
@@ -245,12 +297,9 @@ const FAQPage = () => {
                             </div>
                             
                             <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                              <p className="text-gray-600 dark:text-gray-300 mt-2">
+                              <p className="text-gray-700 dark:text-gray-300 mt-2">
                                 {item.answer}
                               </p>
-                              <div className="mt-4 text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-                                Category: {faqCategories.find(c => c.id === item.categoryId)?.name}
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -263,24 +312,24 @@ const FAQPage = () => {
                     
                     return (
                       <div 
-                        key={`${activeCategory}-${index}`}
+                        key={index}
                         className={`card hover:border-indigo-200 dark:hover:border-indigo-800 transition-all duration-300 overflow-hidden animate-slideUp`}
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
-                        <button
+                        <div 
+                          className="flex items-center justify-between cursor-pointer"
                           onClick={() => handleToggleQuestion(activeCategory, index)}
-                          className="w-full text-left flex justify-between items-center"
                         >
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white pr-8">
                             {item.question}
                           </h3>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 ${isOpen ? 'rotate-180' : ''}`}>
-                            <FaChevronDown className="w-3 h-3" />
+                          <div className={`w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                            <FaChevronDown className={`w-4 h-4 text-indigo-600 dark:text-indigo-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`} />
                           </div>
-                        </button>
+                        </div>
                         
                         <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
-                          <p className="text-gray-600 dark:text-gray-300">
+                          <p className="text-gray-700 dark:text-gray-300">
                             {item.answer}
                           </p>
                         </div>
@@ -294,80 +343,36 @@ const FAQPage = () => {
         </div>
       </div>
 
-      {/* Still Have Questions Section */}
-      <div className="py-20 bg-gray-50 dark:bg-gray-900">
-        <div className="container-custom">
-          <div className="max-w-4xl mx-auto text-center animate-fadeIn">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-              Still Have <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Questions?</span>
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 text-lg mb-12 max-w-2xl mx-auto">
-              If you couldn't find the answer to your question, our support team is here to help you.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="card hover-lift">
-                <div className="w-14 h-14 mb-6 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center mx-auto">
-                  <FaEnvelope className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Email Support</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Send us an email and we'll get back to you within 24 hours.
-                </p>
-                <a href="mailto:support@eventplatform.com" className="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-300">
-                  support@eventplatform.com
-                </a>
-              </div>
-              
-              <div className="card hover-lift">
-                <div className="w-14 h-14 mb-6 rounded-full bg-gradient-to-r from-green-600 to-teal-600 text-white flex items-center justify-center mx-auto">
-                  <FaComments className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Live Chat</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Chat with our support agents in real-time during business hours.
-                </p>
-                <button className="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-300">
-                  Start Chat
-                </button>
-              </div>
-              
-              <div className="card hover-lift">
-                <div className="w-14 h-14 mb-6 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white flex items-center justify-center mx-auto">
-                  <FaPhoneAlt className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Call Us</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Give us a call if you need immediate assistance.
-                </p>
-                <a href="tel:+18001234567" className="text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-300">
-                  +1 800 123 4567
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* CTA Section */}
-      <div className="py-20 mt-20 bg-gradient-to-r from-indigo-600 to-purple-600 text-white relative overflow-hidden z-10">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[url('https://assets.website-files.com/622fbc5a718ac3417fcd3d75/62328c3aef177acc681d309f_noise.png')] opacity-50"></div>
-        </div>
-        
-        <div className="container-custom relative z-10">
-          <div className="max-w-3xl mx-auto text-center animate-fadeIn">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Ready to Create Your Event?</h2>
-            <p className="text-xl text-white mb-10">
-              Join thousands of event organizers who trust our platform
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <button className="btn bg-white text-indigo-600 hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/30">
-                Create an Event
-              </button>
-              <button className="btn btn-outline border-white text-white hover:bg-white/10">
-                Browse Events
-              </button>
+      <div className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container-custom">
+          <div className="card bg-gradient-to-br from-indigo-600 to-purple-600 text-white p-8 md:p-12 overflow-hidden relative">
+            <div className="absolute inset-0 bg-pattern-grid opacity-10"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4">Still have questions?</h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-0">
+                  Our support team is ready to help you with any specific questions you might have about our event platform.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a 
+                  href="#" 
+                  className="btn bg-white text-indigo-600 hover:bg-indigo-50 flex items-center justify-center gap-2"
+                >
+                  <FaComments className="w-4 h-4" />
+                  <span>Chat With Us</span>
+                </a>
+                <a 
+                  href="mailto:support@eventhub.com" 
+                  className="btn btn-outline border-white text-white hover:bg-white/10 flex items-center justify-center gap-2"
+                >
+                  <FaEnvelope className="w-4 h-4" />
+                  <span>Email Support</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
