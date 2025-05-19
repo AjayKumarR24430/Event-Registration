@@ -17,6 +17,7 @@ const Navbar = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const isAdmin = user && (user.role === 'admin' || user.role === 'superadmin');
 
@@ -55,14 +56,16 @@ const Navbar = () => {
     return (
       <Link
         to={to}
-        className={`nav-link group flex h-10 items-center px-3 text-base font-extrabold text-white drop-shadow transition-all duration-200 relative
-          hover:text-indigo-300 dark:hover:text-indigo-300`}
+        className={`nav-link group flex items-center px-4 py-3 text-base font-medium transition-all duration-200 relative
+          ${isActive ? 'text-white bg-indigo-600/20' : 'text-gray-300 hover:text-white'}
+          ${isScrolled ? 'bg-indigo-800/20' : 'bg-transparent'}
+          ${isDarkMode ? 'dark:text-gray-300 dark:hover:text-white' : ''}`}
         onClick={onClick || (() => setIsOpen(false))}
       >
-        {Icon && <Icon className="mr-2 h-4 w-4" />}
-        <span>{children}</span>
+        {Icon && <Icon className="mr-2 h-5 w-5" />}
+        <span className="group-hover:text-indigo-300">{children}</span>
         {isActive && (
-          <span className="absolute bottom-0 left-0 h-0.5 w-full bg-indigo-400 dark:bg-indigo-300"></span>
+          <span className="absolute bottom-0 left-0 h-0.5 w-full bg-indigo-300"></span>
         )}
       </Link>
     );

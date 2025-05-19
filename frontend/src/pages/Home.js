@@ -7,7 +7,8 @@ import Alert from '../components/layout/Alert';
 import { 
   FaCalendarAlt, FaMapMarkerAlt, FaClock, FaTicketAlt, FaChevronRight, 
   FaStar, FaArrowRight, FaSearch, FaFilter, FaUsers, FaMicrophone,
-  FaLaptop, FaMusic, FaGraduationCap, FaUtensils, FaHeartbeat, FaSun, FaMoon, FaImages, FaShare
+  FaLaptop, FaMusic, FaGraduationCap, FaUtensils, FaHeartbeat, FaSun, FaMoon, FaImages, FaShare,
+  FaUserPlus, FaSync, FaChevronDown
 } from 'react-icons/fa';
 
 const Home = () => {
@@ -18,6 +19,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const heroRef = useRef(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
   // Mouse position for spotlight effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -214,27 +216,31 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:bg-gray-900 overflow-hidden">
       {/* Hero Section */}
       <section 
         ref={heroRef}
         className="relative min-h-[85vh] flex items-center justify-center overflow-hidden spotlight"
       >
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-indigo-950 z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-blue-50 to-purple-600/20 dark:from-indigo-900/20 dark:via-gray-900 dark:to-purple-900/20 z-0"></div>
         
         {/* Animated Particles */}
         <div className="particles absolute inset-0 z-10"></div>
         
-        {/* Blurred Shapes */}
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full bg-purple-300 dark:bg-purple-900 filter blur-3xl opacity-30 animate-float"></div>
-        <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-indigo-300 dark:bg-indigo-900 filter blur-3xl opacity-30 animate-float"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-blue-300 dark:bg-blue-900 filter blur-3xl opacity-20 animate-float"></div>
+        {/* Dynamic Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-indigo-500/20 dark:bg-indigo-400/20 filter blur-3xl animate-float"></div>
+          <div className="absolute -bottom-30 -right-30 w-80 h-80 rounded-full bg-purple-500/20 dark:bg-purple-400/20 filter blur-3xl animate-float"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-blue-500/20 dark:bg-blue-400/20 filter blur-3xl animate-float"></div>
+          <div className="absolute -top-40 -right-40 w-40 h-40 rounded-full bg-pink-500/20 dark:bg-pink-400/20 filter blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-40 h-40 rounded-full bg-green-500/20 dark:bg-green-400/20 filter blur-3xl animate-float"></div>
+        </div>
         
         <div className="container-custom relative z-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
-              <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 animate-fadeIn">
+              <h1 className="text-6xl md:text-7xl font-extrabold mb-6 leading-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 animate-fadeIn">
                 {isRtl ? 'اكتشف ألمع الفعاليات' : 'Discover Amazing Events'}
               </h1>
               <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 animate-slideIn">
@@ -246,65 +252,85 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start animate-slideIn delay-150">
                 <Link 
                   to="/events" 
-                  className="btn btn-primary px-8 py-3 text-lg font-medium hover-lift"
+                  className="btn btn-primary px-10 py-4 text-lg font-medium hover-lift transition-all duration-300"
                 >
-                  <span>{isRtl ? 'تصفح جميع الفعاليات' : 'Browse Events'}</span>
-                  <FaArrowRight className="w-5 h-5 ml-2" />
+                  <span className="flex items-center gap-2">
+                    <FaCalendarAlt className="w-6 h-6" />
+                    {isRtl ? 'تصفح جميع الفعاليات' : 'Browse Events'}
+                  </span>
                 </Link>
                 
                 <Link 
                   to="/register" 
-                  className="btn btn-glass px-8 py-3 text-lg font-medium hover-scale"
+                  className="btn btn-glass px-10 py-4 text-lg font-medium hover-scale transition-all duration-300"
                 >
-                  {isRtl ? 'انضم إلينا' : 'Join Us'}
+                  <span className="flex items-center gap-2">
+                    <FaUserPlus className="w-6 h-6" />
+                    {isRtl ? 'انضم إلينا' : 'Join Us'}
+                  </span>
                 </Link>
               </div>
               
-              <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-gray-500 dark:text-gray-400 animate-slideIn delay-300">
-                <div className="flex items-center">
-                  <FaUsers className="w-5 h-5 mr-2 text-indigo-500" />
-                  <span>10K+ Users</span>
+              <div className="mt-12 flex flex-wrap items-center justify-center lg:justify-start gap-8 text-gray-500 dark:text-gray-400 animate-slideIn delay-300">
+                <div className="flex items-center bg-white/10 dark:bg-gray-800/20 px-6 py-4 rounded-xl shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-indigo-500/20 dark:bg-indigo-400/20 flex items-center justify-center">
+                    <FaUsers className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <span className="ml-4 text-xl font-medium">10K+ Users</span>
                 </div>
-                <div className="flex items-center">
-                  <FaCalendarAlt className="w-5 h-5 mr-2 text-indigo-500" />
-                  <span>500+ Events</span>
+                <div className="flex items-center bg-white/10 dark:bg-gray-800/20 px-6 py-4 rounded-xl shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-purple-500/20 dark:bg-purple-400/20 flex items-center justify-center">
+                    <FaCalendarAlt className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="ml-4 text-xl font-medium">500+ Events</span>
                 </div>
-                <div className="flex items-center">
-                  <FaStar className="w-5 h-5 mr-2 text-indigo-500" />
-                  <span>4.9/5 Rating</span>
+                <div className="flex items-center bg-white/10 dark:bg-gray-800/20 px-6 py-4 rounded-xl shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-yellow-500/20 dark:bg-yellow-400/20 flex items-center justify-center">
+                    <FaStar className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <span className="ml-4 text-xl font-medium">4.9/5 Rating</span>
                 </div>
               </div>
             </div>
             
-            <div className="relative h-96 hidden lg:block animate-scaleIn">
+            <div className="relative h-[600px] hidden lg:block animate-scaleIn">
               <div className="absolute inset-0 card-3d">
                 <div className="relative h-full w-full p-8 backdrop-card gradient-border transform hover:scale-[1.02] transition-transform duration-500">
                   <img 
                     src="https://images.unsplash.com/photo-1523580494863-6f3031224c94" 
                     alt="Featured Event" 
-                    className="w-full h-full object-cover rounded-lg shadow-lg"
+                    className="w-full h-full object-cover rounded-xl shadow-xl"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent rounded-lg">
-                    <div className="absolute bottom-10 left-10 right-10 text-white">
-                      <div className="text-sm text-indigo-300 mb-2 flex items-center">
-                        <FaCalendarAlt className="w-4 h-4 mr-2" />
-                        <span>Featured Event</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent rounded-xl">
+                    <div className="absolute bottom-12 left-12 right-12 text-white">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="w-5 h-5 text-indigo-300" />
+                          <span className="text-sm">Featured Event</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaTicketAlt className="w-5 h-5 text-green-300" />
+                          <span className="text-sm">Limited Spots</span>
+                        </div>
                       </div>
-                      <h3 className="text-2xl font-bold mb-2">
+                      <h3 className="text-3xl font-bold mb-4">
                         International Tech Conference 2023
                       </h3>
-                      <div className="flex items-center text-gray-300 text-sm mb-4">
-                        <FaMapMarkerAlt className="w-4 h-4 mr-1" />
-                        <span>San Francisco, CA</span>
-                        <span className="mx-2">•</span>
-                        <FaClock className="w-4 h-4 mr-1" />
-                        <span>Oct 15-18, 2023</span>
+                      <div className="flex items-center gap-8 mb-6">
+                        <div className="flex items-center gap-2">
+                          <FaMapMarkerAlt className="w-5 h-5 text-blue-300" />
+                          <span className="text-gray-300">San Francisco, CA</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaClock className="w-5 h-5 text-yellow-300" />
+                          <span className="text-gray-300">Oct 15-18, 2023</span>
+                        </div>
                       </div>
                       <Link 
                         to="/events/1" 
-                        className="btn btn-primary py-2 px-4 text-sm inline-flex items-center"
+                        className="btn btn-primary py-3 px-6 text-sm inline-flex items-center gap-2"
                       >
-                        <FaTicketAlt className="w-4 h-4 mr-2" />
+                        <FaTicketAlt className="w-5 h-5" />
                         Reserve Your Spot
                       </Link>
                     </div>
@@ -317,66 +343,143 @@ const Home = () => {
       </section>
       
       {/* Featured Events Section */}
-      <section className="py-16">
+      <section className="py-20">
         <div className="container-custom">
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 {isRtl ? 'الفعاليات المميزة' : 'Featured Events'}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-xl text-gray-600 dark:text-gray-400">
                 {isRtl ? 'استكشف أحدث الفعاليات المميزة لدينا' : 'Discover our newest featured events'}
               </p>
             </div>
             
-            <Link 
-              to="/events"
-              className="group flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-            >
-              <span>{isRtl ? 'عرض الكل' : 'View All'}</span>
-              <FaChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-          
-          {/* Search & Filters */}
-          <div className="mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-grow">
-                <input
-                  type="text"
-                  placeholder={isRtl ? 'بحث عن فعاليات...' : 'Search events...'}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="form-control pl-10"
-                />
-                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/events"
+                className="group flex items-center gap-3 text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <FaCalendarAlt className="w-5 h-5" />
+                  {isRtl ? 'عرض الكل' : 'View All'}
+                </span>
+                <FaChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
               
-              <div className="flex items-center gap-2">
-                <button className="btn btn-glass py-2.5 px-4 flex items-center gap-2">
-                  <FaFilter className="w-4 h-4" />
-                  <span>{isRtl ? 'المزيد من الفلاتر' : 'More Filters'}</span>
-                </button>
-              </div>
+              <button 
+                onClick={() => setActiveCategory('all')}
+                className="btn btn-glass px-6 py-3 flex items-center gap-2"
+              >
+                <FaSync className="w-5 h-5" />
+                Reset Filters
+              </button>
             </div>
           </div>
           
+          {/* Search & Filters */}
+          <div className="mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="col-span-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder={isRtl ? 'بحث عن فعاليات...' : 'Search events...'}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-12 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                  />
+                  <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <button 
+                  className="w-full btn btn-glass py-3 flex items-center justify-center gap-3"
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                >
+                  <FaFilter className="w-5 h-5" />
+                  <span>{isRtl ? 'المزيد من الفلاتر' : 'Advanced Filters'}</span>
+                  <FaChevronDown className="w-5 h-5 transition-transform" />
+                </button>
+              </div>
+            </div>
+
+            {showAdvancedFilters && (
+              <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Date Range
+                    </label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="date" 
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                      />
+                      <input 
+                        type="date" 
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Price Range
+                    </label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="number" 
+                        placeholder="Min"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                      />
+                      <input 
+                        type="number" 
+                        placeholder="Max"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Location
+                    </label>
+                    <select 
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700"
+                    >
+                      <option value="">All Locations</option>
+                      <option value="online">Online</option>
+                      <option value="in-person">In-Person</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
           {/* Categories */}
-          <div className="flex flex-wrap gap-2 mb-8 animate-fadeIn">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12">
             {dynamicCategories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`px-5 py-2 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                  className={`group relative w-full p-4 rounded-xl transition-all duration-300 ${
                     activeCategory === category.id 
                       ? 'bg-indigo-600 text-white' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{category.name}</span>
+                  <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900 flex items-center justify-center mb-3">
+                    <Icon className="w-6 h-6 text-indigo-600 dark:text-indigo-300" />
+                  </div>
+                  <h3 className="font-medium text-sm">
+                    {category.name}
+                  </h3>
+                  {activeCategory === category.id && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-indigo-600/10 dark:from-indigo-400/20 dark:to-indigo-400/10 rounded-xl"></div>
+                  )}
                 </button>
               );
             })}
