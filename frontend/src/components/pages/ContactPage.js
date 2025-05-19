@@ -59,18 +59,17 @@ const ContactPage = () => {
         </div>
         
         {/* Bottom Wave - Now positioned higher to cover content */}
-        <div className="absolute bottom-0 left-0 w-full h-full pointer-events-none">
+        <div className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ zIndex: "-1" }}>
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             viewBox="0 0 1440 320" 
-            className="w-full h-full absolute bottom-0"
+            className="w-full absolute bottom-0"
             preserveAspectRatio="none"
-            style={{ minHeight: '320px' }}
           >
             <path 
               fill="#ffffff" 
-              fillOpacity="1" 
-              d="M0,256L40,240C80,224,160,192,240,186.7C320,181,400,203,480,192C560,181,640,139,720,149.3C800,160,880,224,960,229.3C1040,235,1120,181,1200,144C1280,107,1360,85,1400,74.7L1440,64L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+              fillOpacity="0.3" 
+              d="M0,192L60,202.7C120,213,240,235,360,229.3C480,224,600,192,720,192C840,192,960,224,1080,213.3C1200,203,1320,149,1380,122.7L1440,96L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
             ></path>
           </svg>
         </div>
