@@ -24,19 +24,16 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
   useEffect(() => {
-    // Close menus when clicking outside
     const handleClickOutside = (event) => {
       if (userMenuOpen && !event.target.closest('.user-menu-container')) {
         setUserMenuOpen(false);
       }
     };
-    
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [userMenuOpen]);
@@ -52,22 +49,20 @@ const Navbar = () => {
     setUserMenuOpen(false);
   };
 
+  // Bolder, brighter NavLink
   const NavLink = ({ to, children, icon: Icon, onClick }) => {
     const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
     return (
       <Link
         to={to}
-        className={`nav-link group flex h-10 items-center px-3 text-sm font-medium transition-all duration-200 ${
-          isActive 
-            ? 'text-indigo-600 dark:text-indigo-400' 
-            : 'text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400'
-        }`}
+        className={`nav-link group flex h-10 items-center px-3 text-base font-extrabold text-white drop-shadow transition-all duration-200 relative
+          hover:text-indigo-300 dark:hover:text-indigo-300`}
         onClick={onClick || (() => setIsOpen(false))}
       >
         {Icon && <Icon className="mr-2 h-4 w-4" />}
         <span>{children}</span>
         {isActive && (
-          <span className="absolute bottom-0 left-0 h-0.5 w-full bg-indigo-600 dark:bg-indigo-400"></span>
+          <span className="absolute bottom-0 left-0 h-0.5 w-full bg-indigo-400 dark:bg-indigo-300"></span>
         )}
       </Link>
     );
@@ -135,26 +130,26 @@ const Navbar = () => {
         onClick={() => setUserMenuOpen(!userMenuOpen)}
         className="flex items-center gap-2 rounded-full pl-2 pr-3 py-1.5 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
       >
-        <div className="h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+        <div className="h-8 w-8 overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-extrabold drop-shadow">
           {user?.name ? user.name.charAt(0).toUpperCase() : <FaUserCircle className="h-6 w-6" />}
         </div>
-        <span className="hidden text-sm font-medium text-gray-700 dark:text-gray-200 sm:block">
+        <span className="hidden text-base font-extrabold text-white drop-shadow sm:block">
           {user?.name || t('Account')}
         </span>
-        <FaChevronDown className={`h-3 w-3 text-gray-500 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
+        <FaChevronDown className={`h-3 w-3 text-white transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
       </button>
       
       {userMenuOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-gray-800 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 animate-scaleIn origin-top-right z-50">
+        <div className="absolute right-0 mt-2 w-48 rounded-xl bg-gray-900 dark:bg-gray-800 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/10 animate-scaleIn origin-top-right z-50">
           <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+            <p className="text-base font-extrabold text-white drop-shadow">{user?.name}</p>
+            <p className="text-xs text-gray-300 dark:text-gray-300">{user?.email}</p>
           </div>
           
           {isAdmin && (
             <Link 
-              to="/admin/events" 
-              className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+              to="/admin/events"
+              className="flex items-center px-4 py-2 text-base font-extrabold text-white drop-shadow hover:bg-gray-700 w-full text-left"
               onClick={() => setUserMenuOpen(false)}
             >
               <FaCalendarAlt className="mr-2 h-4 w-4 text-indigo-500" />
@@ -164,7 +159,7 @@ const Navbar = () => {
           
           <Link 
             to="/my-registrations" 
-            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+            className="flex items-center px-4 py-2 text-base font-extrabold text-white drop-shadow hover:bg-gray-700 w-full text-left"
             onClick={() => setUserMenuOpen(false)}
           >
             <FaUserCircle className="mr-2 h-4 w-4 text-indigo-500" />
@@ -173,7 +168,7 @@ const Navbar = () => {
           
           <button
             onClick={onLogout}
-            className="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left"
+            className="flex items-center px-4 py-2 text-base font-extrabold text-red-500 drop-shadow hover:bg-gray-700 w-full text-left"
           >
             <FaSignOutAlt className="mr-2 h-4 w-4" />
             {t('Logout')}
@@ -185,13 +180,13 @@ const Navbar = () => {
     <div className="flex items-center gap-2">
       <Link 
         to="/login"
-        className="px-4 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200"
+        className="px-4 py-1.5 text-base font-extrabold text-indigo-200 hover:text-indigo-300 transition-colors duration-200"
       >
         {t('Login')}
       </Link>
       <Link 
         to="/register"
-        className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-1.5 text-sm font-medium text-white shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
+        className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-1.5 text-base font-extrabold text-white drop-shadow shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
       >
         {t('Register')}
       </Link>
@@ -202,25 +197,21 @@ const Navbar = () => {
     <nav 
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         isScrolled 
-          ? 'glass dark:glass-dark shadow-sm py-1.5' 
-          : 'bg-gradient-to-r from-indigo-700/95 via-purple-700/95 to-fuchsia-700/95 backdrop-blur-sm py-1.5 text-white shadow-md shadow-indigo-600/10'
+          ? 'bg-gray-900 shadow-md py-2'
+          : 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-2'
       }`}
     >
       <div className="container-custom flex h-14 items-center justify-between">
         <div className="flex items-center">
           <Link 
             to={user?.role === 'admin' ? '/admin/events' : '/'} 
-            className="flex items-center gap-2 text-xl font-bold group"
+            className="flex items-center gap-2 text-2xl font-extrabold group"
             aria-label="Home"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-colors duration-300">
               <FaCalendarAlt className="h-5 w-5 text-white group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <span className={`transform group-hover:scale-105 transition-transform duration-300 ${
-              isScrolled 
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent' 
-                : 'text-white font-bold'
-            }`}>
+            <span className="text-white font-extrabold text-2xl drop-shadow dark:text-white">
               {t('EventHub')}
             </span>
           </Link>
@@ -342,14 +333,14 @@ const Navbar = () => {
               <div className="flex flex-col gap-2">
                 <Link 
                   to="/login"
-                  className="w-full rounded-lg border border-indigo-600 px-4 py-2 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 transition-colors duration-200"
+                  className="w-full rounded-lg border border-indigo-600 px-4 py-2 text-center text-base font-extrabold text-indigo-200 hover:text-indigo-300 transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {t('Login')}
                 </Link>
                 <Link 
                   to="/register"
-                  className="w-full rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+                  className="w-full rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-center text-base font-extrabold text-white drop-shadow shadow-sm hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {t('Register')}
@@ -361,7 +352,7 @@ const Navbar = () => {
               <div className="flex items-center gap-4">
                 <button 
                   onClick={toggleDarkMode}
-                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  className="flex items-center gap-2 text-base font-extrabold text-white drop-shadow"
                 >
                   {isDarkMode ? (
                     <>
@@ -378,22 +369,12 @@ const Navbar = () => {
                 
                 <button
                   onClick={toggleRtl}
-                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                  className="flex items-center gap-2 text-base font-extrabold text-white drop-shadow"
                 >
-                  <FaGlobe className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>{isRtl ? 'English' : 'العربية'}</span>
+                  <FaGlobe className="h-4 w-4" />
+                  <span>{isRtl ? t('English') : t('Arabic')}</span>
                 </button>
               </div>
-              
-              {isAuthenticated && (
-                <button
-                  onClick={onLogout}
-                  className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400"
-                >
-                  <FaSignOutAlt className="h-4 w-4" />
-                  <span>{t('Logout')}</span>
-                </button>
-              )}
             </div>
           </div>
         </div>
